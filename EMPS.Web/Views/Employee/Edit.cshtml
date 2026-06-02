@@ -1,0 +1,230 @@
+@model EMPS.Web.Models.EmployeeViewModel
+@{
+    ViewData["Title"] = "Edit Employee Profile";
+}
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ProfilePhotoPath" />
+
+    <div class="row g-4 mb-4">
+        <!-- Main Form Left Side -->
+        <div class="col-12 col-lg-8">
+            <div class="d-flex flex-column gap-4">
+                <!-- Personal Info Card -->
+                <div class="card-flat">
+                    <div class="card-flat-header">
+                        <h6 class="m-0 fw-bold"><i class="fa-solid fa-user text-primary me-2"></i>Personal Details</h6>
+                    </div>
+                    <div class="card-flat-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6">
+                                <label asp-for="FirstName" class="form-label form-label-custom">First Name</label>
+                                <input asp-for="FirstName" class="form-control form-control-custom" />
+                                <span asp-validation-for="FirstName" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <label asp-for="LastName" class="form-label form-label-custom">Last Name</label>
+                                <input asp-for="LastName" class="form-control form-control-custom" />
+                                <span asp-validation-for="LastName" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <label asp-for="Email" class="form-label form-label-custom">Email Address</label>
+                                <input asp-for="Email" class="form-control form-control-custom" />
+                                <span asp-validation-for="Email" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <label asp-for="PhoneNumber" class="form-label form-label-custom">Phone Number</label>
+                                <input asp-for="PhoneNumber" class="form-control form-control-custom" />
+                                <span asp-validation-for="PhoneNumber" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <label asp-for="Gender" class="form-label form-label-custom">Gender</label>
+                                <select asp-for="Gender" class="form-select form-control-custom">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <label asp-for="DateOfBirth" class="form-label form-label-custom">Date of Birth</label>
+                                <input asp-for="DateOfBirth" class="form-control form-control-custom" type="date" />
+                                <span asp-validation-for="DateOfBirth" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial / Bank Details Card -->
+                <div class="card-flat">
+                    <div class="card-flat-header">
+                        <h6 class="m-0 fw-bold"><i class="fa-solid fa-credit-card text-primary me-2"></i>Bank & Tax Details</h6>
+                    </div>
+                    <div class="card-flat-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6">
+                                <label asp-for="BankName" class="form-label form-label-custom">Bank Name</label>
+                                <input asp-for="BankName" class="form-control form-control-custom" />
+                                <span asp-validation-for="BankName" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div class="col-12 col-sm-6">
+                                <label asp-for="BankAccountNumber" class="form-label form-label-custom">Account Number</label>
+                                <input asp-for="BankAccountNumber" class="form-control form-control-custom" />
+                                <span asp-validation-for="BankAccountNumber" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="TaxIdentificationNumber" class="form-label form-label-custom">Tax Identification / PAN</label>
+                                <input asp-for="TaxIdentificationNumber" class="form-control form-control-custom" />
+                                <span asp-validation-for="TaxIdentificationNumber" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side Panel -->
+        <div class="col-12 col-lg-4">
+            <div class="d-flex flex-column gap-4">
+                <!-- Profile Image Card -->
+                <div class="card-flat">
+                    <div class="card-flat-header">
+                        <h6 class="m-0 fw-bold"><i class="fa-solid fa-image text-primary me-2"></i>Profile Image</h6>
+                    </div>
+                    <div class="card-flat-body text-center">
+                        <div class="d-inline-block bg-light border rounded-circle mb-3 d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 120px;">
+                            @if (!string.IsNullOrEmpty(Model.ProfilePhotoPath))
+                            {
+                                <img id="imagePreview" src="@Model.ProfilePhotoPath" alt="Photo Preview" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-user-tie fs-1 text-secondary" id="imagePreviewIcon"></i>
+                                <img id="imagePreview" src="" alt="Photo Preview" class="rounded-circle d-none" style="width: 120px; height: 120px; object-fit: cover;" />
+                            }
+                        </div>
+                        <input asp-for="ProfileImage" class="form-control form-control-custom" type="file" accept="image/*" id="imageFileInput" />
+                        <span asp-validation-for="ProfileImage" class="text-danger" style="font-size: 0.8rem;"></span>
+                    </div>
+                </div>
+
+                <!-- Employment Details Card -->
+                <div class="card-flat">
+                    <div class="card-flat-header">
+                        <h6 class="m-0 fw-bold"><i class="fa-solid fa-briefcase text-primary me-2"></i>Employment Details</h6>
+                    </div>
+                    <div class="card-flat-body">
+                        <div class="d-flex flex-column gap-3">
+                            <div>
+                                <label asp-for="EmployeeCode" class="form-label form-label-custom">Employee Code</label>
+                                <input asp-for="EmployeeCode" class="form-control form-control-custom" readonly style="background-color: #f1f5f9; font-family: monospace;" />
+                            </div>
+
+                            <div>
+                                <label asp-for="DepartmentId" class="form-label form-label-custom">Department</label>
+                                <select asp-for="DepartmentId" class="form-select form-control-custom" id="deptSelect" asp-items="ViewBag.Departments">
+                                </select>
+                                <span asp-validation-for="DepartmentId" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div>
+                                <label asp-for="DesignationId" class="form-label form-label-custom">Designation</label>
+                                <select asp-for="DesignationId" class="form-select form-control-custom" id="desigSelect" asp-items="ViewBag.Designations">
+                                </select>
+                                <span asp-validation-for="DesignationId" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div>
+                                <label asp-for="JoiningDate" class="form-label form-label-custom">Joining Date</label>
+                                <input asp-for="JoiningDate" class="form-control form-control-custom" type="date" />
+                                <span asp-validation-for="JoiningDate" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div>
+                                <label asp-for="BasicSalary" class="form-label form-label-custom">Basic Salary</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white text-muted" style="border-radius: 8px 0 0 8px; border-color: var(--border-color); font-weight: 500;">$</span>
+                                    <input asp-for="BasicSalary" class="form-control form-control-custom" style="border-radius: 0 8px 8px 0;" type="number" step="0.01" />
+                                </div>
+                                <span asp-validation-for="BasicSalary" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div>
+                                <label asp-for="EmploymentStatus" class="form-label form-label-custom">Employment Status</label>
+                                <select asp-for="EmploymentStatus" class="form-select form-control-custom">
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    <option value="Terminated">Terminated</option>
+                                    <option value="Resigned">Resigned</option>
+                                </select>
+                                <span asp-validation-for="EmploymentStatus" class="text-danger" style="font-size: 0.8rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card-flat">
+        <div class="card-flat-body d-flex justify-content-end gap-3 py-3">
+            <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+            <button type="submit" class="btn btn-primary px-4"><i class="fa-solid fa-floppy-disk me-2"></i>Update Employee</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            // Photo Preview Handler
+            $('#imageFileInput').on('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#imagePreview').attr('src', e.target.result).removeClass('d-none');
+                        $('#imagePreviewIcon').addClass('d-none');
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Dynamic Designation Dropdown Loading
+            $('#deptSelect').on('change', function () {
+                var deptId = $(this).val();
+                var desigSelect = $('#desigSelect');
+                desigSelect.empty().append('<option value="">-- Loading Designations --</option>');
+
+                if (deptId) {
+                    $.ajax({
+                        url: '/Designation/GetByDepartment',
+                        type: 'GET',
+                        data: { departmentId: deptId },
+                        success: function (data) {
+                            desigSelect.empty().append('<option value="">-- Select Designation --</option>');
+                            $.each(data, function (index, item) {
+                                desigSelect.append('<option value="' + item.id + '">' + item.name + '</option>');
+                            });
+                        },
+                        error: function () {
+                            desigSelect.empty().append('<option value="">-- Error Loading Designations --</option>');
+                        }
+                    });
+                } else {
+                    desigSelect.empty().append('<option value="">-- Select Department First --</option>');
+                }
+            });
+        });
+    </script>
+}

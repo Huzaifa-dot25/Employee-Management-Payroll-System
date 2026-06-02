@@ -1,0 +1,93 @@
+@model IEnumerable<EMPS.Web.Models.DesignationViewModel>
+@{
+    ViewData["Title"] = "Designations";
+}
+
+<div class="card-flat">
+    <div class="card-flat-header">
+        <h5 class="m-0 fw-bold"><i class="fa-solid fa-briefcase text-primary me-2"></i>Designation Management</h5>
+        <a asp-action="Create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Designation</a>
+    </div>
+    <div class="card-flat-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom w-100" id="designationsTable">
+                <thead>
+                    <tr>
+                        <th>Designation</th>
+                        <th>Department</th>
+                        <th>Salary Grade</th>
+                        <th>Basic Salary</th>
+                        <th>Employees Count</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var desig in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@desig.Name</td>
+                            <td>@desig.DepartmentName</td>
+                            <td><span class="badge bg-secondary-subtle text-secondary badge-custom">@desig.SalaryGrade</span></td>
+                            <td class="fw-bold">$@desig.BasicSalary.ToString("N2")</td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary badge-custom">@desig.EmployeeCount</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-2">
+                                    <a asp-action="Edit" asp-route-id="@desig.Id" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger btn-delete-desig" data-id="@desig.Id" data-name="@desig.Name">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<form id="deleteForm" method="post" asp-action="Delete">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="deleteId" name="id" />
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#designationsTable').DataTable({
+                responsive: true,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search designations..."
+                }
+            });
+
+            $('.btn-delete-desig').on('click', function() {
+                var desigId = $(this).data('id');
+                var desigName = $(this).data('name');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You are about to delete designation '" + desigName + "'!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#4f46e5',
+                    cancelButtonColor: '#ef4444',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#deleteId').val(desigId);
+                        $('#deleteForm').submit();
+                    }
+                });
+            });
+        });
+    </script>
+}

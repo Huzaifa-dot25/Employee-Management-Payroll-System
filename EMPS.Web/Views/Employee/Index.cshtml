@@ -1,0 +1,126 @@
+@model IEnumerable<EMPS.Web.Models.EmployeeViewModel>
+@{
+    ViewData["Title"] = "Employees";
+}
+
+<div class="card-flat">
+    <div class="card-flat-header">
+        <h5 class="m-0 fw-bold"><i class="fa-solid fa-users text-primary me-2"></i>Employee Directory</h5>
+        <a asp-action="Create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Employee</a>
+    </div>
+    <div class="card-flat-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom w-100" id="employeesTable">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Code</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                        <th>Joined</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var emp in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (!string.IsNullOrEmpty(emp.ProfilePhotoPath))
+                                    {
+                                        <img src="@emp.ProfilePhotoPath" alt="Avatar" class="rounded-circle" style="width: 36px; height: 36px; object-fit: cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; font-size: 0.9rem; font-weight: 600;">
+                                            @emp.FirstName.Substring(0, 1).ToUpper()
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="fw-semibold">@emp.FullName</div>
+                                        <div class="text-muted" style="font-size: 0.8rem;">@emp.Email</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><code>@emp.EmployeeCode</code></td>
+                            <td>@emp.DepartmentName</td>
+                            <td>@emp.DesignationName</td>
+                            <td>@emp.JoiningDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                @if (emp.EmploymentStatus == "Active")
+                                {
+                                    <span class="badge bg-success-subtle text-success badge-custom">Active</span>
+                                }
+                                else if (emp.EmploymentStatus == "Inactive")
+                                {
+                                    <span class="badge bg-secondary-subtle text-secondary badge-custom">Inactive</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger-subtle text-danger badge-custom">@emp.EmploymentStatus</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-2">
+                                    <a asp-action="Details" asp-route-id="@emp.Id" class="btn btn-sm btn-outline-info" title="View Details">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@emp.Id" class="btn btn-sm btn-outline-secondary" title="Edit Profile">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger btn-delete-emp" data-id="@emp.Id" data-name="@emp.FullName">
+                                        <i class="fa-solid fa-user-slash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<form id="deleteForm" method="post" asp-action="Delete">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="deleteId" name="id" />
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#employeesTable').DataTable({
+                responsive: true,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search employees..."
+                }
+            });
+
+            $('.btn-delete-emp').on('click', function() {
+                var empId = $(this).data('id');
+                var empName = $(this).data('name');
+
+                Swal.fire({
+                    title: 'Deactivate Employee?',
+                    text: "You are about to deactivate '" + empName + "' and their login account!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#4f46e5',
+                    cancelButtonColor: '#ef4444',
+                    confirmButtonText: 'Yes, deactivate'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#deleteId').val(empId);
+                        $('#deleteForm').submit();
+                    }
+                });
+            });
+        });
+    </script>
+}

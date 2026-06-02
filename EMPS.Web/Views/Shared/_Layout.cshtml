@@ -1,0 +1,191 @@
+@using Microsoft.AspNetCore.Identity
+@using EMPS.Core.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Employee Payroll System</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- FontAwesome Icon Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Bootstrap 5 CSS (Flat/Vanilla CDN) -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- DataTables BS5 Integration -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap5.min.css" />
+    <!-- Custom site.css styling -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app-container">
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar">
+                <div class="sidebar-brand">
+                    <i class="fa-solid fa-wallet text-primary"></i>
+                    <span>EMPS Payroll</span>
+                </div>
+                <ul class="sidebar-menu">
+                    <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")">
+                        <a class="sidebar-link" asp-controller="Home" asp-action="Index">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                    {
+                        <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Department" ? "active" : "")">
+                            <a class="sidebar-link" asp-controller="Department" asp-action="Index">
+                                <i class="fa-solid fa-sitemap"></i>
+                                <span>Departments</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Designation" ? "active" : "")">
+                            <a class="sidebar-link" asp-controller="Designation" asp-action="Index">
+                                <i class="fa-solid fa-briefcase"></i>
+                                <span>Designations</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Employee" ? "active" : "")">
+                            <a class="sidebar-link" asp-controller="Employee" asp-action="Index">
+                                <i class="fa-solid fa-users"></i>
+                                <span>Employees</span>
+                            </a>
+                        </li>
+                    }
+                    <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Attendance" ? "active" : "")">
+                        <a class="sidebar-link" asp-controller="Attendance" asp-action="Index">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <span>Attendance</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Leave" ? "active" : "")">
+                        <a class="sidebar-link" asp-controller="Leave" asp-action="Index">
+                            <i class="fa-solid fa-business-time"></i>
+                            <span>Leave Requests</span>
+                        </a>
+                    </li>
+                    @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                    {
+                        <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Payroll" ? "active" : "")">
+                            <a class="sidebar-link" asp-controller="Payroll" asp-action="Index">
+                                <i class="fa-solid fa-receipt"></i>
+                                <span>Payroll processing</span>
+                            </a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Payroll" ? "active" : "")">
+                            <a class="sidebar-link" asp-controller="Payroll" asp-action="MyPayslips">
+                                <i class="fa-solid fa-file-invoice-dollar"></i>
+                                <span>My Payslips</span>
+                            </a>
+                        </li>
+                    }
+                    <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Report" ? "active" : "")">
+                        <a class="sidebar-link" asp-controller="Report" asp-action="Index">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>Reports</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+        }
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div class="d-flex align-items-center gap-3">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <h4 class="m-0 fw-semibold text-secondary" id="page-title-display">@ViewData["Title"]</h4>
+                    }
+                    else
+                    {
+                        <h4 class="m-0 fw-semibold text-primary"><i class="fa-solid fa-wallet me-2"></i>Employee Payroll System</h4>
+                    }
+                </div>
+
+                <div class="d-flex align-items-center gap-4">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        var currentUser = await UserManager.GetUserAsync(User);
+                        <!-- Profile Dropdown -->
+                        <div class="dropdown">
+                            <button class="btn dropdown-toggle border-0 d-flex align-items-center gap-2 p-0" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; font-weight: 600;">
+                                    @(currentUser?.FullName?.Length > 0 ? currentUser.FullName.Substring(0, 1).ToUpper() : "U")
+                                </div>
+                                <div class="text-start d-none d-sm-block">
+                                    <div class="fw-semibold text-main" style="font-size: 0.85rem; line-height: 1.2;">@(currentUser?.FullName ?? User.Identity?.Name)</div>
+                                    <div class="text-muted" style="font-size: 0.75rem;">
+                                        @(User.IsInRole("Admin") ? "Admin" : User.IsInRole("HR") ? "HR" : "Employee")
+                                    </div>
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="userDropdown">
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
+                                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-right-from-bracket"></i>
+                                            <span>Logout</span>
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary" asp-controller="Account" asp-action="Login">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i>Login
+                        </a>
+                    }
+                </div>
+            </header>
+
+            <!-- Content Body -->
+            <main class="content-wrapper">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+                        <i class="fa-solid fa-circle-check me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
+                        <i class="fa-solid fa-circle-xmark me-2"></i>@TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables Integration -->
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.4.1/js/responsive.bootstrap5.min.js"></script>
+    <!-- SweetAlert2 for beautiful confirmations -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

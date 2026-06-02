@@ -1,0 +1,91 @@
+@model IEnumerable<EMPS.Web.Models.DepartmentViewModel>
+@{
+    ViewData["Title"] = "Departments";
+}
+
+<div class="card-flat">
+    <div class="card-flat-header">
+        <h5 class="m-0 fw-bold"><i class="fa-solid fa-sitemap text-primary me-2"></i>Department Management</h5>
+        <a asp-action="Create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Department</a>
+    </div>
+    <div class="card-flat-body p-0">
+        <div class="table-responsive">
+            <table class="table table-custom w-100" id="departmentsTable">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Employees Count</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dept in Model)
+                    {
+                        <tr>
+                            <td><code>@dept.Code</code></td>
+                            <td class="fw-semibold">@dept.Name</td>
+                            <td class="text-muted">@(string.IsNullOrEmpty(dept.Description) ? "N/A" : dept.Description)</td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary badge-custom">@dept.EmployeeCount</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-2">
+                                    <a asp-action="Edit" asp-route-id="@dept.Id" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger btn-delete-dept" data-id="@dept.Id" data-name="@dept.Name">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<form id="deleteForm" method="post" asp-action="Delete">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="deleteId" name="id" />
+</form>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#departmentsTable').DataTable({
+                responsive: true,
+                dom: "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search departments..."
+                }
+            });
+
+            $('.btn-delete-dept').on('click', function() {
+                var deptId = $(this).data('id');
+                var deptName = $(this).data('name');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You are about to delete department '" + deptName + "'!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#4f46e5',
+                    cancelButtonColor: '#ef4444',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#deleteId').val(deptId);
+                        $('#deleteForm').submit();
+                    }
+                });
+            });
+        });
+    </script>
+}

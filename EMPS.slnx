@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="EMPS.Core/EMPS.Core.csproj" />
+  <Project Path="EMPS.Infrastructure/EMPS.Infrastructure.csproj" />
+  <Project Path="EMPS.Web/EMPS.Web.csproj" />
+</Solution>
