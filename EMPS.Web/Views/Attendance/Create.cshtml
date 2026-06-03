@@ -1,0 +1,109 @@
+@model EMPS.Web.Models.AttendanceViewModel
+@{
+    ViewData["Title"] = "Mark Attendance";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-9 col-lg-7">
+
+        <div class="form-page-header mb-4">
+            <div class="form-page-icon"><i class="fa-solid fa-calendar-check"></i></div>
+            <div>
+                <h4 class="form-page-title">Mark Attendance</h4>
+                <p class="form-page-sub">Record attendance details for an employee.</p>
+            </div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm ms-auto">
+                <i class="fa-solid fa-arrow-left me-1"></i>Back
+            </a>
+        </div>
+
+        <div class="form-card">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-4"></div>
+
+                <div class="form-field-group mb-4">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-user"></i> Employee
+                    </div>
+                    <label asp-for="EmployeeId" class="form-label form-label-custom">Select Employee</label>
+                    <select asp-for="EmployeeId" class="form-select form-control-custom" asp-items="ViewBag.Employees">
+                        <option value="">— Choose an employee —</option>
+                    </select>
+                    <span asp-validation-for="EmployeeId" class="field-error"></span>
+                </div>
+
+                <div class="form-field-group mb-4">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-calendar-days"></i> Date & Status
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <label asp-for="Date" class="form-label form-label-custom">Date</label>
+                            <div class="input-icon-wrap">
+                                <i class="fa-regular fa-calendar input-icon"></i>
+                                <input asp-for="Date" class="form-control form-control-custom input-with-icon" type="date" />
+                            </div>
+                            <span asp-validation-for="Date" class="field-error"></span>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label asp-for="Status" class="form-label form-label-custom">Attendance Status</label>
+                            <select asp-for="Status" class="form-select form-control-custom">
+                                <option value="Present">✅ Present</option>
+                                <option value="Absent">❌ Absent</option>
+                                <option value="Leave">🏖 Leave</option>
+                                <option value="Late">⏰ Late</option>
+                                <option value="HalfDay">🌗 Half Day</option>
+                            </select>
+                            <span asp-validation-for="Status" class="field-error"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-field-group mb-4">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-clock"></i> Timings
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <label asp-for="CheckInTime" class="form-label form-label-custom">Check In</label>
+                            <div class="input-icon-wrap">
+                                <i class="fa-regular fa-clock input-icon"></i>
+                                <input asp-for="CheckInTime" class="form-control form-control-custom input-with-icon" type="time" />
+                            </div>
+                            <span asp-validation-for="CheckInTime" class="field-error"></span>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label asp-for="CheckOutTime" class="form-label form-label-custom">Check Out</label>
+                            <div class="input-icon-wrap">
+                                <i class="fa-regular fa-clock input-icon"></i>
+                                <input asp-for="CheckOutTime" class="form-control form-control-custom input-with-icon" type="time" />
+                            </div>
+                            <span asp-validation-for="CheckOutTime" class="field-error"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-field-group mb-5">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-note-sticky"></i> Remarks
+                    </div>
+                    <label asp-for="Remarks" class="form-label form-label-custom">Additional Remarks</label>
+                    <textarea asp-for="Remarks" class="form-control form-control-custom" rows="3" placeholder="Optional notes..."></textarea>
+                    <span asp-validation-for="Remarks" class="field-error"></span>
+                </div>
+
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-5">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Save Attendance
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,154 @@
+@model IEnumerable<EMPS.Web.Models.LeaveRequestViewModel>
+@{
+    ViewData["Title"] = "Leave Requests";
+    int pending  = Model.Count(l => l.Status == "Pending");
+    int approved = Model.Count(l => l.Status == "Approved");
+    int rejected = Model.Count(l => l.Status == "Rejected");
+}
+
+<div class="module-header">
+    <div class="module-header-left">
+        <div class="module-icon-wrap" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">
+            <i class="fa-solid fa-business-time"></i>
+        </div>
+        <div>
+            <h3 class="module-title">Leave Requests</h3>
+            <p class="module-sub">Review and manage employee leave applications</p>
+        </div>
+    </div>
+    <a asp-action="Create" class="btn-module-add">
+        <i class="fa-solid fa-plus"></i>
+        <span>New Request</span>
+    </a>
+</div>
+
+<div class="module-stats-strip mb-4">
+    <div class="mss-item">
+        <span class="mss-value text-warning">@pending</span>
+        <span class="mss-label">Pending</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value text-success">@approved</span>
+        <span class="mss-label">Approved</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value text-danger">@rejected</span>
+        <span class="mss-label">Rejected</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value">@Model.Count()</span>
+        <span class="mss-label">Total</span>
+    </div>
+</div>
+
+<div class="data-table-card">
+    <div class="table-responsive">
+        <table class="table module-table w-100" id="leaveTable">
+            <thead>
+                <tr>
+                    @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                    {
+                        <th>Employee</th>
+                    }
+                    <th>Leave Type</th>
+                    <th>Duration</th>
+                    <th>Days</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                    {
+                        <th class="text-end">Actions</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                        {
+                            <td><span class="row-primary-text">@item.EmployeeName</span></td>
+                        }
+                        <td>
+                            @if (item.LeaveType == "Sick")
+                            {
+                                <span class="leave-type-chip leave-sick"><i class="fa-solid fa-kit-medical"></i> Sick</span>
+                            }
+                            else if (item.LeaveType == "Annual")
+                            {
+                                <span class="leave-type-chip leave-annual"><i class="fa-solid fa-umbrella-beach"></i> Annual</span>
+                            }
+                            else
+                            {
+                                <span class="leave-type-chip leave-casual"><i class="fa-solid fa-mug-hot"></i> @item.LeaveType</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="date-range">
+                                <span>@item.StartDate.ToString("MMM dd")</span>
+                                <i class="fa-solid fa-arrow-right" style="font-size:.6rem;opacity:.5;"></i>
+                                <span>@item.EndDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="count-badge">@item.TotalDays <span style="font-weight:500;opacity:.7;">days</span></span>
+                        </td>
+                        <td>
+                            <span class="text-muted" style="font-size:.8rem;max-width:180px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="@item.Reason">
+                                @(string.IsNullOrEmpty(item.Reason) ? "—" : item.Reason)
+                            </span>
+                        </td>
+                        <td>
+                            @if (item.Status == "Approved")
+                            {
+                                <span class="status-badge status-active">Approved</span>
+                            }
+                            else if (item.Status == "Rejected")
+                            {
+                                <span class="status-badge status-terminated">Rejected</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-pending">Pending</span>
+                            }
+                        </td>
+                        @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                        {
+                            <td class="text-end">
+                                <div class="action-btns">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="action-btn action-btn-edit" title="Process">
+                                        <i class="fa-solid fa-clipboard-check"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#leaveTable').DataTable({
+                responsive: true,
+                order: [[@(User.IsInRole("Admin") || User.IsInRole("HR") ? 2 : 1), 'desc']],
+                dom: "<'dt-toolbar'<'dt-toolbar-left'l><'dt-toolbar-right'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'dt-footer'<'dt-footer-left'i><'dt-footer-right'p>>",
+                language: {
+                    search: "",
+                    searchPlaceholder: "🔍  Search leave requests...",
+                    lengthMenu: "Show _MENU_ rows",
+                    info: "Showing _START_–_END_ of _TOTAL_ requests",
+                    paginate: { previous: "‹ Prev", next: "Next ›" }
+                }
+            });
+        });
+    </script>
+}

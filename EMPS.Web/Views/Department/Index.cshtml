@@ -1,50 +1,84 @@
 @model IEnumerable<EMPS.Web.Models.DepartmentViewModel>
 @{
     ViewData["Title"] = "Departments";
+    int totalDepts = Model.Count();
 }
 
-<div class="card-flat">
-    <div class="card-flat-header">
-        <h5 class="m-0 fw-bold"><i class="fa-solid fa-sitemap text-primary me-2"></i>Department Management</h5>
-        <a asp-action="Create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Department</a>
-    </div>
-    <div class="card-flat-body p-0">
-        <div class="table-responsive">
-            <table class="table table-custom w-100" id="departmentsTable">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Employees Count</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var dept in Model)
-                    {
-                        <tr>
-                            <td><code>@dept.Code</code></td>
-                            <td class="fw-semibold">@dept.Name</td>
-                            <td class="text-muted">@(string.IsNullOrEmpty(dept.Description) ? "N/A" : dept.Description)</td>
-                            <td>
-                                <span class="badge bg-primary-subtle text-primary badge-custom">@dept.EmployeeCount</span>
-                            </td>
-                            <td class="text-end">
-                                <div class="d-inline-flex gap-2">
-                                    <a asp-action="Edit" asp-route-id="@dept.Id" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-outline-danger btn-delete-dept" data-id="@dept.Id" data-name="@dept.Name">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<div class="module-header">
+    <div class="module-header-left">
+        <div class="module-icon-wrap" style="background:linear-gradient(135deg,#4f46e5,#818cf8);">
+            <i class="fa-solid fa-sitemap"></i>
         </div>
+        <div>
+            <h3 class="module-title">Department Management</h3>
+            <p class="module-sub">Manage your organisational departments</p>
+        </div>
+    </div>
+    <a asp-action="Create" class="btn-module-add">
+        <i class="fa-solid fa-plus"></i>
+        <span>Add Department</span>
+    </a>
+</div>
+
+<div class="module-stats-strip mb-4">
+    <div class="mss-item">
+        <span class="mss-value">@totalDepts</span>
+        <span class="mss-label">Total Departments</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value">@Model.Sum(d => d.EmployeeCount)</span>
+        <span class="mss-label">Total Employees</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value">@Model.Count(d => d.EmployeeCount > 0)</span>
+        <span class="mss-label">Active Departments</span>
+    </div>
+</div>
+
+<div class="data-table-card">
+    <div class="table-responsive">
+        <table class="table module-table w-100" id="departmentsTable">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Department Name</th>
+                    <th>Description</th>
+                    <th>Employees</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var dept in Model)
+                {
+                    <tr>
+                        <td>
+                            <span class="code-pill">@dept.Code</span>
+                        </td>
+                        <td>
+                            <div class="row-primary-text">@dept.Name</div>
+                        </td>
+                        <td>
+                            <span class="text-muted">@(string.IsNullOrEmpty(dept.Description) ? "—" : dept.Description)</span>
+                        </td>
+                        <td>
+                            <span class="count-badge">@dept.EmployeeCount <span style="font-weight:500;opacity:.7;">emp</span></span>
+                        </td>
+                        <td class="text-end">
+                            <div class="action-btns">
+                                <a asp-action="Edit" asp-route-id="@dept.Id" class="action-btn action-btn-edit" title="Edit">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <button class="action-btn action-btn-delete btn-delete-dept" data-id="@dept.Id" data-name="@dept.Name" title="Delete">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -55,36 +89,33 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#departmentsTable').DataTable({
                 responsive: true,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                dom: "<'dt-toolbar'<'dt-toolbar-left'l><'dt-toolbar-right'f>>" +
                      "<'row'<'col-sm-12'tr>>" +
-                     "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                     "<'dt-footer'<'dt-footer-left'i><'dt-footer-right'p>>",
                 language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search departments..."
+                    search: "",
+                    searchPlaceholder: "🔍  Search departments...",
+                    lengthMenu: "Show _MENU_ rows",
+                    info: "Showing _START_–_END_ of _TOTAL_ departments",
+                    paginate: { previous: "‹ Prev", next: "Next ›" }
                 }
             });
 
-            $('.btn-delete-dept').on('click', function() {
-                var deptId = $(this).data('id');
-                var deptName = $(this).data('name');
-
+            $('.btn-delete-dept').on('click', function () {
+                var id = $(this).data('id'), name = $(this).data('name');
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You are about to delete department '" + deptName + "'!",
+                    title: 'Delete Department?',
+                    html: "You're about to delete <strong>" + name + "</strong>. This cannot be undone.",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#4f46e5',
-                    cancelButtonColor: '#ef4444',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $('#deleteId').val(deptId);
-                        $('#deleteForm').submit();
-                    }
-                });
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, delete',
+                    cancelButtonText: 'Cancel'
+                }).then(r => { if (r.isConfirmed) { $('#deleteId').val(id); $('#deleteForm').submit(); } });
             });
         });
     </script>

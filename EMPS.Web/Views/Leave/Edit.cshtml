@@ -1,0 +1,127 @@
+@model EMPS.Web.Models.LeaveRequestViewModel
+@{
+    ViewData["Title"] = "Process Leave Request";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-9 col-lg-7">
+
+        <div class="form-page-header mb-4">
+            <div class="form-page-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+            <div>
+                <h4 class="form-page-title">Process Leave Request</h4>
+                <p class="form-page-sub">Review and update the status of this leave request.</p>
+            </div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm ms-auto">
+                <i class="fa-solid fa-arrow-left me-1"></i>Back
+            </a>
+        </div>
+
+        <div class="form-card">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-4"></div>
+
+                @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                {
+                    <div class="form-field-group mb-4">
+                        <div class="form-section-label">
+                            <i class="fa-solid fa-user"></i> Employee
+                        </div>
+                        <label asp-for="EmployeeId" class="form-label form-label-custom">Select Employee</label>
+                        <select asp-for="EmployeeId" class="form-select form-control-custom" asp-items="ViewBag.Employees">
+                            <option value="">— Choose an employee —</option>
+                        </select>
+                        <span asp-validation-for="EmployeeId" class="field-error"></span>
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" asp-for="EmployeeId" />
+                }
+
+                <div class="form-field-group mb-4">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-tag"></i> Leave Type
+                    </div>
+                    <div class="leave-type-picker">
+                        <label class="leave-type-option">
+                            <input type="radio" name="LeaveType" value="Casual" @(Model.LeaveType == "Casual" ? "checked" : "") />
+                            <span><i class="fa-solid fa-mug-hot"></i> Casual</span>
+                        </label>
+                        <label class="leave-type-option">
+                            <input type="radio" name="LeaveType" value="Sick" @(Model.LeaveType == "Sick" ? "checked" : "") />
+                            <span><i class="fa-solid fa-kit-medical"></i> Sick</span>
+                        </label>
+                        <label class="leave-type-option">
+                            <input type="radio" name="LeaveType" value="Annual" @(Model.LeaveType == "Annual" ? "checked" : "") />
+                            <span><i class="fa-solid fa-umbrella-beach"></i> Annual</span>
+                        </label>
+                    </div>
+                    <span asp-validation-for="LeaveType" class="field-error"></span>
+                </div>
+
+                <div class="form-field-group mb-4">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-calendar-days"></i> Duration
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <label asp-for="StartDate" class="form-label form-label-custom">Start Date</label>
+                            <div class="input-icon-wrap">
+                                <i class="fa-regular fa-calendar input-icon"></i>
+                                <input asp-for="StartDate" class="form-control form-control-custom input-with-icon" type="date" />
+                            </div>
+                            <span asp-validation-for="StartDate" class="field-error"></span>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label asp-for="EndDate" class="form-label form-label-custom">End Date</label>
+                            <div class="input-icon-wrap">
+                                <i class="fa-regular fa-calendar input-icon"></i>
+                                <input asp-for="EndDate" class="form-control form-control-custom input-with-icon" type="date" />
+                            </div>
+                            <span asp-validation-for="EndDate" class="field-error"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-field-group mb-4">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-pen-to-square"></i> Reason
+                    </div>
+                    <label asp-for="Reason" class="form-label form-label-custom">Reason for Leave</label>
+                    <textarea asp-for="Reason" class="form-control form-control-custom" rows="3"></textarea>
+                    <span asp-validation-for="Reason" class="field-error"></span>
+                </div>
+
+                @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                {
+                    <div class="form-field-group mb-5">
+                        <div class="form-section-label">
+                            <i class="fa-solid fa-gavel"></i> Decision
+                        </div>
+                        <label asp-for="Status" class="form-label form-label-custom">Approval Status</label>
+                        <select asp-for="Status" class="form-select form-control-custom">
+                            <option value="Pending">⏳ Pending</option>
+                            <option value="Approved">✅ Approved</option>
+                            <option value="Rejected">❌ Rejected</option>
+                        </select>
+                        <span asp-validation-for="Status" class="field-error"></span>
+                    </div>
+                }
+
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-5">
+                        <i class="fa-solid fa-floppy-disk me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

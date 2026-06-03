@@ -5,47 +5,66 @@
 
 <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-6">
-        <div class="card-flat">
-            <div class="card-flat-header">
-                <h5 class="m-0 fw-bold"><i class="fa-solid fa-plus text-primary me-2"></i>Add Designation</h5>
-                <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1"></i>Back</a>
+
+        <div class="form-page-header mb-4">
+            <div class="form-page-icon"><i class="fa-solid fa-briefcase"></i></div>
+            <div>
+                <h4 class="form-page-title">Add Designation</h4>
+                <p class="form-page-sub">Define a job title with its department and salary band.</p>
             </div>
-            <div class="card-flat-body">
-                <form asp-action="Create" method="post">
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm ms-auto">
+                <i class="fa-solid fa-arrow-left me-1"></i>Back
+            </a>
+        </div>
+
+        <div class="form-card">
+            <form asp-action="Create" method="post">
+
+                <div class="form-field-group mb-4">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-sitemap"></i> Organization
+                    </div>
                     <div class="mb-3">
                         <label asp-for="DepartmentId" class="form-label form-label-custom">Department</label>
                         <select asp-for="DepartmentId" class="form-select form-control-custom" asp-items="ViewBag.DepartmentsList">
-                            <option value="">-- Select Department --</option>
+                            <option value="">— Select Department —</option>
                         </select>
-                        <span asp-validation-for="DepartmentId" class="text-danger" style="font-size: 0.8rem;"></span>
+                        <span asp-validation-for="DepartmentId" class="field-error"></span>
                     </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Name" class="form-label form-label-custom">Designation Name</label>
+                    <div>
+                        <label asp-for="Name" class="form-label form-label-custom">Designation Title</label>
                         <input asp-for="Name" class="form-control form-control-custom" placeholder="e.g. Senior Software Engineer" />
-                        <span asp-validation-for="Name" class="text-danger" style="font-size: 0.8rem;"></span>
+                        <span asp-validation-for="Name" class="field-error"></span>
                     </div>
+                </div>
 
+                <div class="form-field-group mb-5">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-money-bill-wave"></i> Compensation
+                    </div>
                     <div class="mb-3">
                         <label asp-for="SalaryGrade" class="form-label form-label-custom">Salary Grade</label>
                         <input asp-for="SalaryGrade" class="form-control form-control-custom" placeholder="e.g. Grade A3" />
-                        <span asp-validation-for="SalaryGrade" class="text-danger" style="font-size: 0.8rem;"></span>
+                        <span asp-validation-for="SalaryGrade" class="field-error"></span>
                     </div>
-
-                    <div class="mb-4">
+                    <div>
                         <label asp-for="BasicSalary" class="form-label form-label-custom">Basic Salary</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-white text-muted" style="border-radius: 8px 0 0 8px; border-color: var(--border-color); font-weight: 500;">$</span>
-                            <input asp-for="BasicSalary" class="form-control form-control-custom" style="border-radius: 0 8px 8px 0;" type="number" step="0.01" placeholder="0.00" />
+                            <span class="input-group-text">$</span>
+                            <input asp-for="BasicSalary" class="form-control form-control-custom" type="number" step="0.01" placeholder="0.00" />
                         </div>
-                        <span asp-validation-for="BasicSalary" class="text-danger" style="font-size: 0.8rem;"></span>
+                        <span asp-validation-for="BasicSalary" class="field-error"></span>
                     </div>
+                </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-5">
                         <i class="fa-solid fa-floppy-disk me-2"></i>Save Designation
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
+
     </div>
 </div>

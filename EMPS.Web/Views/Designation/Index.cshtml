@@ -3,50 +3,85 @@
     ViewData["Title"] = "Designations";
 }
 
-<div class="card-flat">
-    <div class="card-flat-header">
-        <h5 class="m-0 fw-bold"><i class="fa-solid fa-briefcase text-primary me-2"></i>Designation Management</h5>
-        <a asp-action="Create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Designation</a>
-    </div>
-    <div class="card-flat-body p-0">
-        <div class="table-responsive">
-            <table class="table table-custom w-100" id="designationsTable">
-                <thead>
-                    <tr>
-                        <th>Designation</th>
-                        <th>Department</th>
-                        <th>Salary Grade</th>
-                        <th>Basic Salary</th>
-                        <th>Employees Count</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var desig in Model)
-                    {
-                        <tr>
-                            <td class="fw-semibold">@desig.Name</td>
-                            <td>@desig.DepartmentName</td>
-                            <td><span class="badge bg-secondary-subtle text-secondary badge-custom">@desig.SalaryGrade</span></td>
-                            <td class="fw-bold">$@desig.BasicSalary.ToString("N2")</td>
-                            <td>
-                                <span class="badge bg-primary-subtle text-primary badge-custom">@desig.EmployeeCount</span>
-                            </td>
-                            <td class="text-end">
-                                <div class="d-inline-flex gap-2">
-                                    <a asp-action="Edit" asp-route-id="@desig.Id" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-outline-danger btn-delete-desig" data-id="@desig.Id" data-name="@desig.Name">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+<div class="module-header">
+    <div class="module-header-left">
+        <div class="module-icon-wrap" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">
+            <i class="fa-solid fa-briefcase"></i>
         </div>
+        <div>
+            <h3 class="module-title">Designation Management</h3>
+            <p class="module-sub">Define job titles, salary grades, and compensation bands</p>
+        </div>
+    </div>
+    <a asp-action="Create" class="btn-module-add">
+        <i class="fa-solid fa-plus"></i>
+        <span>Add Designation</span>
+    </a>
+</div>
+
+<div class="module-stats-strip mb-4">
+    <div class="mss-item">
+        <span class="mss-value">@Model.Count()</span>
+        <span class="mss-label">Total Designations</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value">$@Model.Average(d => d.BasicSalary).ToString("N0")</span>
+        <span class="mss-label">Avg. Basic Salary</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value">@Model.Select(d => d.DepartmentName).Distinct().Count()</span>
+        <span class="mss-label">Departments Covered</span>
+    </div>
+</div>
+
+<div class="data-table-card">
+    <div class="table-responsive">
+        <table class="table module-table w-100" id="designationsTable">
+            <thead>
+                <tr>
+                    <th>Designation</th>
+                    <th>Department</th>
+                    <th>Salary Grade</th>
+                    <th>Basic Salary</th>
+                    <th>Employees</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var desig in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="row-primary-text">@desig.Name</div>
+                        </td>
+                        <td>
+                            <span class="dept-tag">@desig.DepartmentName</span>
+                        </td>
+                        <td>
+                            <span class="grade-pill">@desig.SalaryGrade</span>
+                        </td>
+                        <td>
+                            <span class="salary-value">$@desig.BasicSalary.ToString("N2")</span>
+                        </td>
+                        <td>
+                            <span class="count-badge">@desig.EmployeeCount <span style="font-weight:500;opacity:.7;">emp</span></span>
+                        </td>
+                        <td class="text-end">
+                            <div class="action-btns">
+                                <a asp-action="Edit" asp-route-id="@desig.Id" class="action-btn action-btn-edit" title="Edit">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <button class="action-btn action-btn-delete btn-delete-desig" data-id="@desig.Id" data-name="@desig.Name" title="Delete">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -57,36 +92,32 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#designationsTable').DataTable({
                 responsive: true,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                dom: "<'dt-toolbar'<'dt-toolbar-left'l><'dt-toolbar-right'f>>" +
                      "<'row'<'col-sm-12'tr>>" +
-                     "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                     "<'dt-footer'<'dt-footer-left'i><'dt-footer-right'p>>",
                 language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search designations..."
+                    search: "",
+                    searchPlaceholder: "🔍  Search designations...",
+                    lengthMenu: "Show _MENU_ rows",
+                    info: "Showing _START_–_END_ of _TOTAL_ designations",
+                    paginate: { previous: "‹ Prev", next: "Next ›" }
                 }
             });
 
-            $('.btn-delete-desig').on('click', function() {
-                var desigId = $(this).data('id');
-                var desigName = $(this).data('name');
-
+            $('.btn-delete-desig').on('click', function () {
+                var id = $(this).data('id'), name = $(this).data('name');
                 Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You are about to delete designation '" + desigName + "'!",
+                    title: 'Delete Designation?',
+                    html: "You're about to delete <strong>" + name + "</strong>.",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#4f46e5',
-                    cancelButtonColor: '#ef4444',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $('#deleteId').val(desigId);
-                        $('#deleteForm').submit();
-                    }
-                });
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, delete'
+                }).then(r => { if (r.isConfirmed) { $('#deleteId').val(id); $('#deleteForm').submit(); } });
             });
         });
     </script>

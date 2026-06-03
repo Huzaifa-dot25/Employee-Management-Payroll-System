@@ -1,85 +1,117 @@
 @model IEnumerable<EMPS.Web.Models.EmployeeViewModel>
 @{
     ViewData["Title"] = "Employees";
+    int active   = Model.Count(e => e.EmploymentStatus == "Active");
+    int inactive = Model.Count(e => e.EmploymentStatus != "Active");
 }
 
-<div class="card-flat">
-    <div class="card-flat-header">
-        <h5 class="m-0 fw-bold"><i class="fa-solid fa-users text-primary me-2"></i>Employee Directory</h5>
-        <a asp-action="Create" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus me-1"></i>Add Employee</a>
+<div class="module-header">
+    <div class="module-header-left">
+        <div class="module-icon-wrap" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8);">
+            <i class="fa-solid fa-users"></i>
+        </div>
+        <div>
+            <h3 class="module-title">Employee Directory</h3>
+            <p class="module-sub">View and manage all employees in your organisation</p>
+        </div>
     </div>
-    <div class="card-flat-body p-0">
-        <div class="table-responsive">
-            <table class="table table-custom w-100" id="employeesTable">
-                <thead>
+    <a asp-action="Create" class="btn-module-add">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>Add Employee</span>
+    </a>
+</div>
+
+<div class="module-stats-strip mb-4">
+    <div class="mss-item">
+        <span class="mss-value">@Model.Count()</span>
+        <span class="mss-label">Total Employees</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value text-success">@active</span>
+        <span class="mss-label">Active</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value text-danger">@inactive</span>
+        <span class="mss-label">Inactive / Terminated</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value">@Model.Select(e => e.DepartmentName).Distinct().Count()</span>
+        <span class="mss-label">Departments</span>
+    </div>
+</div>
+
+<div class="data-table-card">
+    <div class="table-responsive">
+        <table class="table module-table w-100" id="employeesTable">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Code</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emp in Model)
+                {
                     <tr>
-                        <th>Employee</th>
-                        <th>Code</th>
-                        <th>Department</th>
-                        <th>Designation</th>
-                        <th>Joined</th>
-                        <th>Status</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var emp in Model)
-                    {
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    @if (!string.IsNullOrEmpty(emp.ProfilePhotoPath))
-                                    {
-                                        <img src="@emp.ProfilePhotoPath" alt="Avatar" class="rounded-circle" style="width: 36px; height: 36px; object-fit: cover;" />
-                                    }
-                                    else
-                                    {
-                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; font-size: 0.9rem; font-weight: 600;">
-                                            @emp.FirstName.Substring(0, 1).ToUpper()
-                                        </div>
-                                    }
-                                    <div>
-                                        <div class="fw-semibold">@emp.FullName</div>
-                                        <div class="text-muted" style="font-size: 0.8rem;">@emp.Email</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td><code>@emp.EmployeeCode</code></td>
-                            <td>@emp.DepartmentName</td>
-                            <td>@emp.DesignationName</td>
-                            <td>@emp.JoiningDate.ToString("MMM dd, yyyy")</td>
-                            <td>
-                                @if (emp.EmploymentStatus == "Active")
+                        <td>
+                            <div class="emp-cell">
+                                @if (!string.IsNullOrEmpty(emp.ProfilePhotoPath))
                                 {
-                                    <span class="badge bg-success-subtle text-success badge-custom">Active</span>
-                                }
-                                else if (emp.EmploymentStatus == "Inactive")
-                                {
-                                    <span class="badge bg-secondary-subtle text-secondary badge-custom">Inactive</span>
+                                    <img src="@emp.ProfilePhotoPath" class="emp-avatar-img" alt="@emp.FullName" />
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger-subtle text-danger badge-custom">@emp.EmploymentStatus</span>
+                                    <div class="emp-avatar-initials">@emp.FirstName.Substring(0, 1).ToUpper()</div>
                                 }
-                            </td>
-                            <td class="text-end">
-                                <div class="d-inline-flex gap-2">
-                                    <a asp-action="Details" asp-route-id="@emp.Id" class="btn btn-sm btn-outline-info" title="View Details">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
-                                    <a asp-action="Edit" asp-route-id="@emp.Id" class="btn btn-sm btn-outline-secondary" title="Edit Profile">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <button class="btn btn-sm btn-outline-danger btn-delete-emp" data-id="@emp.Id" data-name="@emp.FullName">
-                                        <i class="fa-solid fa-user-slash"></i>
-                                    </button>
+                                <div>
+                                    <div class="row-primary-text">@emp.FullName</div>
+                                    <div class="row-secondary-text">@emp.Email</div>
                                 </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                            </div>
+                        </td>
+                        <td><span class="code-pill">@emp.EmployeeCode</span></td>
+                        <td><span class="dept-tag">@emp.DepartmentName</span></td>
+                        <td><span class="text-sub" style="font-size:.825rem;">@emp.DesignationName</span></td>
+                        <td><span class="date-text">@emp.JoiningDate.ToString("MMM dd, yyyy")</span></td>
+                        <td>
+                            @if (emp.EmploymentStatus == "Active")
+                            {
+                                <span class="status-badge status-active">Active</span>
+                            }
+                            else if (emp.EmploymentStatus == "Inactive")
+                            {
+                                <span class="status-badge status-inactive">Inactive</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-terminated">@emp.EmploymentStatus</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="action-btns">
+                                <a asp-action="Details" asp-route-id="@emp.Id" class="action-btn action-btn-view" title="View">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@emp.Id" class="action-btn action-btn-edit" title="Edit">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <button class="action-btn action-btn-delete btn-delete-emp" data-id="@emp.Id" data-name="@emp.FullName" title="Deactivate">
+                                    <i class="fa-solid fa-user-slash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -90,36 +122,32 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#employeesTable').DataTable({
                 responsive: true,
-                dom: "<'row mb-3'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
+                dom: "<'dt-toolbar'<'dt-toolbar-left'l><'dt-toolbar-right'f>>" +
                      "<'row'<'col-sm-12'tr>>" +
-                     "<'row mt-3'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                     "<'dt-footer'<'dt-footer-left'i><'dt-footer-right'p>>",
                 language: {
-                    search: "_INPUT_",
-                    searchPlaceholder: "Search employees..."
+                    search: "",
+                    searchPlaceholder: "🔍  Search employees...",
+                    lengthMenu: "Show _MENU_ rows",
+                    info: "Showing _START_–_END_ of _TOTAL_ employees",
+                    paginate: { previous: "‹ Prev", next: "Next ›" }
                 }
             });
 
-            $('.btn-delete-emp').on('click', function() {
-                var empId = $(this).data('id');
-                var empName = $(this).data('name');
-
+            $('.btn-delete-emp').on('click', function () {
+                var id = $(this).data('id'), name = $(this).data('name');
                 Swal.fire({
                     title: 'Deactivate Employee?',
-                    text: "You are about to deactivate '" + empName + "' and their login account!",
+                    html: "This will deactivate <strong>" + name + "</strong> and disable their login access.",
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#4f46e5',
-                    cancelButtonColor: '#ef4444',
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
                     confirmButtonText: 'Yes, deactivate'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $('#deleteId').val(empId);
-                        $('#deleteForm').submit();
-                    }
-                });
+                }).then(r => { if (r.isConfirmed) { $('#deleteId').val(id); $('#deleteForm').submit(); } });
             });
         });
     </script>

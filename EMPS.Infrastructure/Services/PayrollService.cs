@@ -1,0 +1,75 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using EMPS.Core.Entities;
+using EMPS.Core.Interfaces;
+using EMPS.Core.Interfaces.Services;
+
+namespace EMPS.Infrastructure.Services
+{
+    public class PayrollService : IPayrollService
+    {
+        private readonly IUnitOfWork _unitOfWork;
+
+        public PayrollService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<IEnumerable<Payroll>> GetAllPayrollsAsync()
+        {
+            var payrolls = await _unitOfWork.Payrolls.GetAllAsync();
+            return payrolls.OrderByDescending(p => p.Year).ThenByDescending(p => p.Month);
+        }
+
+        public async Task<Payroll?> GetPayrollByIdAsync(int id)
+        {
+            return await _unitOfWork.Payrolls.GetByIdAsync(id);
+        }
+
+        public async Task<IEnumerable<Payroll>> GetPayrollsByEmployeeIdAsync(int employeeId)
+        {
+            var results = await _unitOfWork.Payrolls.FindAsync(p => p.EmployeeId == employeeId);
+            return results.OrderByDescending(p => p.Year).ThenByDescending(p => p.Month);
+        }
+
+        public async Task CreatePayrollAsync(Payroll payroll, string userId)
+        {
+            await _unitOfWork.Payrolls.AddAsync(payroll);
+            await _unitOfWork.SaveChangesAsync(userId);
+        }
+
+        public async Task UpdatePayrollAsync(Payroll payroll, string userId)
+        {
+            _unitOfWork.Payrolls.Update(payroll);
+            await _unitOfWork.SaveChangesAsync(userId);
+        }
+
+        public async Task DeletePayrollAsync(int id, string userId)
+        {
+            var payroll = await _unitOfWork.Payrolls.GetByIdAsync(id);
+            if (payroll != null)
+            {
+                _unitOfWork.Payrolls.Remove(payroll);
+                await _unitOfWork.SaveChangesAsync(userId);
+            }
+        }
+
+        public async Task GeneratePayslipAsync(int payrollId, string userId)
+        {
+            var payroll = await _unitOfWork.Payrolls.GetByIdAsync(payrollId);
+            if (payroll != null && payroll.Status == "Paid")
+            {
+                var payslip = new Payslip
+                {
+                    PayrollId = payroll.Id,
+                    GeneratedAt = DateTime.UtcNow,
+                    PdfFilePath = null
+                };
+                await _unitOfWork.Payslips.AddAsync(payslip);
+                await _unitOfWork.SaveChangesAsync(userId);
+            }
+        }
+    }
+}

@@ -1,0 +1,119 @@
+@model IEnumerable<EMPS.Web.Models.PayrollViewModel>
+@{
+    ViewData["Title"] = "Payroll Processing";
+    decimal totalNet  = Model.Sum(p => p.NetSalary);
+    int paid          = Model.Count(p => p.Status == "Paid");
+    int draft         = Model.Count(p => p.Status == "Draft");
+}
+
+<div class="module-header">
+    <div class="module-header-left">
+        <div class="module-icon-wrap" style="background:linear-gradient(135deg,#059669,#34d399);">
+            <i class="fa-solid fa-receipt"></i>
+        </div>
+        <div>
+            <h3 class="module-title">Payroll Processing</h3>
+            <p class="module-sub">Process, approve, and track employee salary records</p>
+        </div>
+    </div>
+    <a asp-action="Create" class="btn-module-add">
+        <i class="fa-solid fa-plus"></i>
+        <span>New Payroll</span>
+    </a>
+</div>
+
+<div class="module-stats-strip mb-4">
+    <div class="mss-item">
+        <span class="mss-value">@Model.Count()</span>
+        <span class="mss-label">Total Records</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value text-success">$@totalNet.ToString("N0")</span>
+        <span class="mss-label">Total Net Payout</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value text-success">@paid</span>
+        <span class="mss-label">Paid</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value text-warning">@draft</span>
+        <span class="mss-label">Draft</span>
+    </div>
+</div>
+
+<div class="data-table-card">
+    <div class="table-responsive">
+        <table class="table module-table w-100" id="payrollTable">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Period</th>
+                    <th>Basic Salary</th>
+                    <th>Gross</th>
+                    <th>Net Salary</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><span class="row-primary-text">@item.EmployeeName</span></td>
+                        <td>
+                            <span class="period-chip">@(new DateTime(item.Year, item.Month, 1).ToString("MMM yyyy"))</span>
+                        </td>
+                        <td><span class="text-sub" style="font-size:.825rem;">@item.BasicSalary.ToString("C")</span></td>
+                        <td><span class="text-sub" style="font-size:.825rem;">@item.GrossSalary.ToString("C")</span></td>
+                        <td><span class="salary-value">@item.NetSalary.ToString("C")</span></td>
+                        <td>
+                            @if (item.Status == "Paid")
+                            {
+                                <span class="status-badge status-active">Paid</span>
+                            }
+                            else if (item.Status == "Approved")
+                            {
+                                <span class="status-badge status-approved">Approved</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-inactive">Draft</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="action-btns">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="action-btn action-btn-edit" title="Edit">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#payrollTable').DataTable({
+                responsive: true,
+                order: [[1, 'desc']],
+                dom: "<'dt-toolbar'<'dt-toolbar-left'l><'dt-toolbar-right'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'dt-footer'<'dt-footer-left'i><'dt-footer-right'p>>",
+                language: {
+                    search: "",
+                    searchPlaceholder: "🔍  Search payroll...",
+                    lengthMenu: "Show _MENU_ rows",
+                    info: "Showing _START_–_END_ of _TOTAL_ records",
+                    paginate: { previous: "‹ Prev", next: "Next ›" }
+                }
+            });
+        });
+    </script>
+}

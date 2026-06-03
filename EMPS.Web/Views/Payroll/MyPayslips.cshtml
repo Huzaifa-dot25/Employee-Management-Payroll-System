@@ -1,0 +1,95 @@
+@model IEnumerable<EMPS.Web.Models.PayrollViewModel>
+@{
+    ViewData["Title"] = "My Payslips";
+    decimal totalNet = Model.Sum(p => p.NetSalary);
+    int paidCount    = Model.Count(p => p.Status == "Paid");
+}
+
+<div class="module-header">
+    <div class="module-header-left">
+        <div class="module-icon-wrap" style="background:linear-gradient(135deg,#4f46e5,#818cf8);">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+        </div>
+        <div>
+            <h3 class="module-title">My Payslips</h3>
+            <p class="module-sub">Your personal salary and payroll history</p>
+        </div>
+    </div>
+</div>
+
+<div class="module-stats-strip mb-4">
+    <div class="mss-item">
+        <span class="mss-value">@Model.Count()</span>
+        <span class="mss-label">Total Payslips</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value text-success">$@totalNet.ToString("N0")</span>
+        <span class="mss-label">Total Earned</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value text-success">@paidCount</span>
+        <span class="mss-label">Paid</span>
+    </div>
+</div>
+
+<div class="data-table-card">
+    <div class="table-responsive">
+        <table class="table module-table w-100" id="payslipTable">
+            <thead>
+                <tr>
+                    <th>Period</th>
+                    <th>Basic Salary</th>
+                    <th>Allowances</th>
+                    <th>Deductions</th>
+                    <th>Net Salary</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><span class="period-chip">@(new DateTime(item.Year, item.Month, 1).ToString("MMMM yyyy"))</span></td>
+                        <td><span class="text-sub" style="font-size:.825rem;">@item.BasicSalary.ToString("C")</span></td>
+                        <td><span class="text-sub text-success" style="font-size:.825rem;">+@((item.Allowances + item.Bonuses + item.OvertimePay).ToString("C"))</span></td>
+                        <td><span class="text-sub text-danger" style="font-size:.825rem;">-@((item.TaxDeductions + item.OtherDeductions).ToString("C"))</span></td>
+                        <td><span class="salary-value">@item.NetSalary.ToString("C")</span></td>
+                        <td>
+                            @if (item.Status == "Paid")
+                            {
+                                <span class="status-badge status-active">Paid</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-approved">@item.Status</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#payslipTable').DataTable({
+                responsive: true,
+                order: [[0, 'desc']],
+                dom: "<'dt-toolbar'<'dt-toolbar-left'l><'dt-toolbar-right'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'dt-footer'<'dt-footer-left'i><'dt-footer-right'p>>",
+                language: {
+                    search: "",
+                    searchPlaceholder: "🔍  Search payslips...",
+                    lengthMenu: "Show _MENU_ rows",
+                    info: "Showing _START_–_END_ of _TOTAL_ payslips",
+                    paginate: { previous: "‹ Prev", next: "Next ›" }
+                }
+            });
+        });
+    </script>
+}

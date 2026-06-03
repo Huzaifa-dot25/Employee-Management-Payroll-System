@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<div class="form-page-header mb-5">
+    <div class="form-page-icon"><i class="fa-solid fa-chart-line"></i></div>
+    <div>
+        <h4 class="form-page-title">Reports Dashboard</h4>
+        <p class="form-page-sub">Generate and export data reports for your organisation.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-md-4">
+        <div class="report-card">
+            <div class="report-card-icon" style="background:linear-gradient(135deg,#4f46e5,#818cf8);">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <h5 class="report-card-title">Employee Report</h5>
+            <p class="report-card-desc">Export a full directory of all employees including personal, employment, and salary details.</p>
+            <button class="btn btn-primary w-100">
+                <i class="fa-solid fa-file-arrow-down me-2"></i>Generate Report
+            </button>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="report-card">
+            <div class="report-card-icon" style="background:linear-gradient(135deg,#10b981,#34d399);">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <h5 class="report-card-title">Attendance Report</h5>
+            <p class="report-card-desc">Export monthly or custom-range attendance logs with check-in / check-out records.</p>
+            <button class="btn btn-success w-100">
+                <i class="fa-solid fa-file-arrow-down me-2"></i>Generate Report
+            </button>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="report-card">
+            <div class="report-card-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+            </div>
+            <h5 class="report-card-title">Payroll Report</h5>
+            <p class="report-card-desc">Export processed payroll data including earnings, deductions, and net salary summaries.</p>
+            <button class="btn btn-warning w-100">
+                <i class="fa-solid fa-file-arrow-down me-2"></i>Generate Report
+            </button>
+        </div>
+    </div>
+</div>

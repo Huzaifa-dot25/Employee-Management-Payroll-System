@@ -1,126 +1,192 @@
 @model EMPS.Web.Models.EmployeeViewModel
 @{
-    ViewData["Title"] = "Employee Profile Details";
+    ViewData["Title"] = "Employee Profile";
 }
 
 <div class="row g-4">
-    <!-- Left Profile Side Card -->
+
+    <!-- Profile Card -->
     <div class="col-12 col-lg-4">
-        <div class="card-flat text-center">
-            <div class="card-flat-body">
-                <div class="d-inline-block bg-primary-subtle border rounded-circle mb-3 d-flex align-items-center justify-content-center mx-auto" style="width: 130px; height: 130px; overflow: hidden;">
+        <div class="profile-card">
+            <div class="profile-card-banner"></div>
+            <div class="profile-card-body">
+                <div class="profile-avatar-wrap">
                     @if (!string.IsNullOrEmpty(Model.ProfilePhotoPath))
                     {
-                        <img src="@Model.ProfilePhotoPath" alt="Profile Photo" style="width: 130px; height: 130px; object-fit: cover;" />
+                        <img src="@Model.ProfilePhotoPath" alt="Profile" class="profile-avatar-img" />
                     }
                     else
                     {
-                        <span class="text-primary fw-bold" style="font-size: 3.5rem;">@Model.FirstName.Substring(0, 1).ToUpper()</span>
+                        <div class="profile-avatar-initials">
+                            @Model.FirstName.Substring(0, 1).ToUpper()
+                        </div>
                     }
                 </div>
-                <h4 class="fw-bold text-main mb-1">@Model.FullName</h4>
-                <p class="text-muted mb-2">@Model.DesignationName</p>
+                <h4 class="profile-name">@Model.FullName</h4>
+                <p class="profile-designation">@Model.DesignationName</p>
                 <div class="mb-3">
                     @if (Model.EmploymentStatus == "Active")
                     {
-                        <span class="badge bg-success-subtle text-success badge-custom fs-7">Active</span>
+                        <span class="badge bg-success-subtle text-success badge-custom px-3">
+                            <i class="fa-solid fa-circle-check me-1" style="font-size:0.65rem;"></i>Active
+                        </span>
                     }
                     else
                     {
-                        <span class="badge bg-danger-subtle text-danger badge-custom fs-7">@Model.EmploymentStatus</span>
+                        <span class="badge bg-danger-subtle text-danger badge-custom px-3">@Model.EmploymentStatus</span>
                     }
                 </div>
-                <hr />
-                <div class="text-start mt-4">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <i class="fa-solid fa-id-card text-muted" style="width: 20px;"></i>
+
+                <div class="profile-meta-list">
+                    <div class="profile-meta-item">
+                        <div class="profile-meta-icon"><i class="fa-solid fa-id-badge"></i></div>
                         <div>
-                            <div class="text-muted" style="font-size: 0.75rem;">Employee Code</div>
-                            <div class="fw-semibold text-main"><code>@Model.EmployeeCode</code></div>
+                            <div class="profile-meta-label">Employee Code</div>
+                            <code class="profile-meta-value">@Model.EmployeeCode</code>
                         </div>
                     </div>
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <i class="fa-solid fa-envelope text-muted" style="width: 20px;"></i>
+                    <div class="profile-meta-item">
+                        <div class="profile-meta-icon"><i class="fa-solid fa-envelope"></i></div>
                         <div>
-                            <div class="text-muted" style="font-size: 0.75rem;">Email Address</div>
-                            <div class="fw-semibold text-main">@Model.Email</div>
+                            <div class="profile-meta-label">Email</div>
+                            <div class="profile-meta-value">@Model.Email</div>
                         </div>
                     </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <i class="fa-solid fa-phone text-muted" style="width: 20px;"></i>
+                    <div class="profile-meta-item">
+                        <div class="profile-meta-icon"><i class="fa-solid fa-phone"></i></div>
                         <div>
-                            <div class="text-muted" style="font-size: 0.75rem;">Phone Number</div>
-                            <div class="fw-semibold text-main">@Model.PhoneNumber</div>
+                            <div class="profile-meta-label">Phone</div>
+                            <div class="profile-meta-value">@Model.PhoneNumber</div>
+                        </div>
+                    </div>
+                    <div class="profile-meta-item">
+                        <div class="profile-meta-icon"><i class="fa-solid fa-sitemap"></i></div>
+                        <div>
+                            <div class="profile-meta-label">Department</div>
+                            <div class="profile-meta-value">@Model.DepartmentName</div>
                         </div>
                     </div>
                 </div>
+
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary w-100 mt-2">
+                    <i class="fa-solid fa-pen me-2"></i>Edit Profile
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Right Profile Info Side Panel -->
+    <!-- Info Panels -->
     <div class="col-12 col-lg-8">
         <div class="d-flex flex-column gap-4">
-            <!-- Full Profile Data Overview -->
-            <div class="card-flat">
-                <div class="card-flat-header">
-                    <h5 class="m-0 fw-bold"><i class="fa-solid fa-address-card text-primary me-2"></i>Profile Information</h5>
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm"><i class="fa-solid fa-pen me-1"></i>Edit Profile</a>
+
+            <!-- Employment -->
+            <div class="info-panel">
+                <div class="info-panel-header">
+                    <i class="fa-solid fa-briefcase text-primary"></i>
+                    <span>Employment Details</span>
                 </div>
-                <div class="card-flat-body">
-                    <div class="row g-4">
-                        <!-- Left Info Column -->
+                <div class="info-panel-body">
+                    <div class="row g-0">
                         <div class="col-12 col-sm-6">
-                            <h6 class="text-muted fw-semibold text-uppercase mb-3" style="font-size: 0.75rem;">Employment Profile</h6>
-                            <div class="d-flex flex-column gap-3">
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Department</div>
-                                    <div class="fw-semibold text-main">@Model.DepartmentName</div>
-                                </div>
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Designation</div>
-                                    <div class="fw-semibold text-main">@Model.DesignationName</div>
-                                </div>
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Joining Date</div>
-                                    <div class="fw-semibold text-main">@Model.JoiningDate.ToString("MMMM dd, yyyy")</div>
-                                </div>
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Basic Salary</div>
-                                    <div class="fw-semibold text-main">$@Model.BasicSalary.ToString("N2")</div>
-                                </div>
+                            <div class="info-field">
+                                <div class="info-field-label">Designation</div>
+                                <div class="info-field-value">@Model.DesignationName</div>
                             </div>
                         </div>
-
-                        <!-- Right Info Column -->
                         <div class="col-12 col-sm-6">
-                            <h6 class="text-muted fw-semibold text-uppercase mb-3" style="font-size: 0.75rem;">Personal Details</h6>
-                            <div class="d-flex flex-column gap-3">
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Gender</div>
-                                    <div class="fw-semibold text-main">@Model.Gender</div>
-                                </div>
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Date of Birth</div>
-                                    <div class="fw-semibold text-main">@Model.DateOfBirth.ToString("MMMM dd, yyyy")</div>
-                                </div>
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Bank / Bank Branch</div>
-                                    <div class="fw-semibold text-main">@Model.BankName</div>
-                                </div>
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Bank Account Number</div>
-                                    <div class="fw-semibold text-main">@Model.BankAccountNumber</div>
-                                </div>
-                                <div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">Tax ID / PAN</div>
-                                    <div class="fw-semibold text-main">@Model.TaxIdentificationNumber</div>
-                                </div>
+                            <div class="info-field">
+                                <div class="info-field-label">Department</div>
+                                <div class="info-field-value">@Model.DepartmentName</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="info-field">
+                                <div class="info-field-label">Joining Date</div>
+                                <div class="info-field-value">@Model.JoiningDate.ToString("MMMM dd, yyyy")</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="info-field">
+                                <div class="info-field-label">Basic Salary</div>
+                                <div class="info-field-value fw-700 text-success">$@Model.BasicSalary.ToString("N2")</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="info-field border-bottom-0">
+                                <div class="info-field-label">Employment Status</div>
+                                <div class="info-field-value">@Model.EmploymentStatus</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Personal -->
+            <div class="info-panel">
+                <div class="info-panel-header">
+                    <i class="fa-solid fa-user text-primary"></i>
+                    <span>Personal Information</span>
+                </div>
+                <div class="info-panel-body">
+                    <div class="row g-0">
+                        <div class="col-12 col-sm-6">
+                            <div class="info-field">
+                                <div class="info-field-label">Full Name</div>
+                                <div class="info-field-value">@Model.FullName</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="info-field">
+                                <div class="info-field-label">Gender</div>
+                                <div class="info-field-value">@Model.Gender</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="info-field">
+                                <div class="info-field-label">Date of Birth</div>
+                                <div class="info-field-value">@Model.DateOfBirth.ToString("MMMM dd, yyyy")</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="info-field border-bottom-0">
+                                <div class="info-field-label">Email Address</div>
+                                <div class="info-field-value">@Model.Email</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bank & Tax -->
+            <div class="info-panel">
+                <div class="info-panel-header">
+                    <i class="fa-solid fa-building-columns text-primary"></i>
+                    <span>Bank & Tax Details</span>
+                </div>
+                <div class="info-panel-body">
+                    <div class="row g-0">
+                        <div class="col-12 col-sm-6">
+                            <div class="info-field">
+                                <div class="info-field-label">Bank Name</div>
+                                <div class="info-field-value">@Model.BankName</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="info-field">
+                                <div class="info-field-label">Account Number</div>
+                                <div class="info-field-value">@Model.BankAccountNumber</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="info-field border-bottom-0">
+                                <div class="info-field-label">Tax ID / PAN</div>
+                                <div class="info-field-value">@Model.TaxIdentificationNumber</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

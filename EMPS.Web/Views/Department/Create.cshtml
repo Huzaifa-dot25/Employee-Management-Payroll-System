@@ -5,36 +5,54 @@
 
 <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-6">
-        <div class="card-flat">
-            <div class="card-flat-header">
-                <h5 class="m-0 fw-bold"><i class="fa-solid fa-plus text-primary me-2"></i>Add Department</h5>
-                <a asp-action="Index" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1"></i>Back</a>
+
+        <div class="form-page-header mb-4">
+            <div class="form-page-icon"><i class="fa-solid fa-sitemap"></i></div>
+            <div>
+                <h4 class="form-page-title">Add Department</h4>
+                <p class="form-page-sub">Create a new organizational department.</p>
             </div>
-            <div class="card-flat-body">
-                <form asp-action="Create" method="post">
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm ms-auto">
+                <i class="fa-solid fa-arrow-left me-1"></i>Back
+            </a>
+        </div>
+
+        <div class="form-card">
+            <form asp-action="Create" method="post">
+
+                <div class="form-field-group mb-4">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-hashtag"></i> Identification
+                    </div>
                     <div class="mb-3">
                         <label asp-for="Code" class="form-label form-label-custom">Department Code</label>
                         <input asp-for="Code" class="form-control form-control-custom" placeholder="e.g. DEPT-HR" />
-                        <span asp-validation-for="Code" class="text-danger" style="font-size: 0.8rem;"></span>
+                        <span asp-validation-for="Code" class="field-error"></span>
                     </div>
-
-                    <div class="mb-3">
+                    <div>
                         <label asp-for="Name" class="form-label form-label-custom">Department Name</label>
                         <input asp-for="Name" class="form-control form-control-custom" placeholder="e.g. Human Resources" />
-                        <span asp-validation-for="Name" class="text-danger" style="font-size: 0.8rem;"></span>
+                        <span asp-validation-for="Name" class="field-error"></span>
                     </div>
+                </div>
 
-                    <div class="mb-4">
-                        <label asp-for="Description" class="form-label form-label-custom">Description</label>
-                        <textarea asp-for="Description" class="form-control form-control-custom" rows="3" placeholder="Optional description of the department..."></textarea>
-                        <span asp-validation-for="Description" class="text-danger" style="font-size: 0.8rem;"></span>
+                <div class="form-field-group mb-5">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-align-left"></i> Details
                     </div>
+                    <label asp-for="Description" class="form-label form-label-custom">Description</label>
+                    <textarea asp-for="Description" class="form-control form-control-custom" rows="3" placeholder="Optional description of this department..."></textarea>
+                    <span asp-validation-for="Description" class="field-error"></span>
+                </div>
 
-                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-5">
                         <i class="fa-solid fa-floppy-disk me-2"></i>Save Department
                     </button>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
+
     </div>
 </div>

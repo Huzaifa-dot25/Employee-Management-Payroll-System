@@ -12,6 +12,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- FontAwesome Icon Library -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- Bootstrap 5 CSS (Flat/Vanilla CDN) -->
@@ -29,7 +30,7 @@
             <!-- Sidebar Navigation -->
             <aside class="sidebar">
                 <div class="sidebar-brand">
-                    <i class="fa-solid fa-wallet text-primary"></i>
+                    <div class="brand-icon"><i class="fa-solid fa-wallet"></i></div>
                     <span>EMPS Payroll</span>
                 </div>
                 <ul class="sidebar-menu">
@@ -107,37 +108,38 @@
                 <div class="d-flex align-items-center gap-3">
                     @if (SignInManager.IsSignedIn(User))
                     {
-                        <h4 class="m-0 fw-semibold text-secondary" id="page-title-display">@ViewData["Title"]</h4>
+                        <h5 class="page-title" id="page-title-display">@ViewData["Title"]</h5>
                     }
                     else
                     {
-                        <h4 class="m-0 fw-semibold text-primary"><i class="fa-solid fa-wallet me-2"></i>Employee Payroll System</h4>
+                        <h5 class="page-title"><i class="fa-solid fa-wallet me-2 text-primary"></i>Employee Payroll System</h5>
                     }
                 </div>
 
-                <div class="d-flex align-items-center gap-4">
+                <div class="d-flex align-items-center gap-3">
                     @if (SignInManager.IsSignedIn(User))
                     {
                         var currentUser = await UserManager.GetUserAsync(User);
                         <!-- Profile Dropdown -->
                         <div class="dropdown">
-                            <button class="btn dropdown-toggle border-0 d-flex align-items-center gap-2 p-0" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; font-weight: 600;">
+                            <button class="user-pill border-0 dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="user-avatar">
                                     @(currentUser?.FullName?.Length > 0 ? currentUser.FullName.Substring(0, 1).ToUpper() : "U")
                                 </div>
                                 <div class="text-start d-none d-sm-block">
-                                    <div class="fw-semibold text-main" style="font-size: 0.85rem; line-height: 1.2;">@(currentUser?.FullName ?? User.Identity?.Name)</div>
-                                    <div class="text-muted" style="font-size: 0.75rem;">
-                                        @(User.IsInRole("Admin") ? "Admin" : User.IsInRole("HR") ? "HR" : "Employee")
+                                    <div class="user-info-name">@(currentUser?.FullName ?? User.Identity?.Name)</div>
+                                    <div class="user-info-role">
+                                        @(User.IsInRole("Admin") ? "Administrator" : User.IsInRole("HR") ? "HR Manager" : "Employee")
                                     </div>
                                 </div>
+                                <i class="fa-solid fa-chevron-down ms-1 text-muted" style="font-size:0.65rem;"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2" aria-labelledby="userDropdown">
+                            <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userDropdown">
                                 <li>
                                     <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
                                         <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2">
                                             <i class="fa-solid fa-right-from-bracket"></i>
-                                            <span>Logout</span>
+                                            <span>Sign out</span>
                                         </button>
                                     </form>
                                 </li>
