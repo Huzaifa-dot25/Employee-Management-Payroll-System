@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using EMPS.Core.Entities;
@@ -18,13 +19,19 @@ namespace EMPS.Web.Controllers
     {
         private readonly IPayrollService _payrollService;
         private readonly IEmployeeService _employeeService;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
 
-        public PayrollController(IPayrollService payrollService, IEmployeeService employeeService, IMapper mapper)
+        public PayrollController(
+            IPayrollService payrollService,
+            IEmployeeService employeeService,
+            UserManager<ApplicationUser> userManager,
+            IMapper mapper)
         {
-            _payrollService = payrollService;
+            _payrollService  = payrollService;
             _employeeService = employeeService;
-            _mapper = mapper;
+            _userManager     = userManager;
+            _mapper          = mapper;
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -103,20 +110,29 @@ namespace EMPS.Web.Controllers
 
         public async Task<IActionResult> MyPayslips()
         {
-            var employees = await _employeeService.GetAllEmployeesAsync();
-            var email = User.Identity?.Name;
-            var currentEmployee = employees.FirstOrDefault(e => e.Email == email);
-            
-            if (currentEmployee != null)
+            var employeeId = await GetCurrentEmployeeIdAsync();
+
+            if (employeeId.HasValue)
             {
-                var payrolls = await _payrollService.GetPayrollsByEmployeeIdAsync(currentEmployee.Id);
-                // Only show Approved or Paid
+                var payrolls = await _payrollService.GetPayrollsByEmployeeIdAsync(employeeId.Value);
+                // Only show Approved or Paid payslips to employees
                 payrolls = payrolls.Where(p => p.Status != "Draft").ToList();
                 var model = _mapper.Map<IEnumerable<PayrollViewModel>>(payrolls);
                 return View(model);
             }
-            
+
             return View(new List<PayrollViewModel>());
+        }
+
+        // ── Helpers ──────────────────────────────────────────────────────────
+
+        private async Task<int?> GetCurrentEmployeeIdAsync()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return null;
+
+            var appUser = await _userManager.FindByIdAsync(userId);
+            return appUser?.EmployeeId;
         }
 
         private async Task PopulateEmployeesDropdownAsync(int? selectedEmployeeId = null)

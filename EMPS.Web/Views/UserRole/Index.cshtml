@@ -1,0 +1,147 @@
+@model IEnumerable<EMPS.Web.Models.UserRoleViewModel>
+@{
+    ViewData["Title"] = "Role Management";
+    int adminCount    = Model.Count(u => u.CurrentRole == "Admin");
+    int hrCount       = Model.Count(u => u.CurrentRole == "HR");
+    int empCount      = Model.Count(u => u.CurrentRole == "Employee");
+}
+
+<div class="module-header">
+    <div class="module-header-left">
+        <div class="module-icon-wrap" style="background:linear-gradient(135deg,#dc2626,#f87171);">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+            <h3 class="module-title">Role Management</h3>
+            <p class="module-sub">Assign and manage user access roles across the system</p>
+        </div>
+    </div>
+</div>
+
+<div class="module-stats-strip mb-4">
+    <div class="mss-item">
+        <span class="mss-value">@Model.Count()</span>
+        <span class="mss-label">Total Users</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value" style="color:#dc2626;">@adminCount</span>
+        <span class="mss-label">Admins</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value" style="color:#7c3aed;">@hrCount</span>
+        <span class="mss-label">HR Managers</span>
+    </div>
+    <div class="mss-divider"></div>
+    <div class="mss-item">
+        <span class="mss-value" style="color:#0ea5e9;">@empCount</span>
+        <span class="mss-label">Employees</span>
+    </div>
+</div>
+
+<div class="data-table-card">
+    <div class="table-responsive">
+        <table class="table module-table w-100" id="rolesTable">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Current Role</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="emp-cell">
+                                <div class="emp-avatar-initials" style="@(user.CurrentRole == "Admin" ? "background:linear-gradient(135deg,#dc2626,#f87171)" : user.CurrentRole == "HR" ? "background:linear-gradient(135deg,#7c3aed,#a78bfa)" : "background:linear-gradient(135deg,#0ea5e9,#38bdf8)")">
+                                    @user.FullName.Substring(0, 1).ToUpper()
+                                </div>
+                                <div>
+                                    <div class="row-primary-text">@user.FullName</div>
+                                    <div class="row-secondary-text">@user.Email</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(user.DepartmentName))
+                            {
+                                <span class="dept-tag">@user.DepartmentName</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="text-sub" style="font-size:.825rem;">
+                                @(string.IsNullOrEmpty(user.DesignationName) ? "—" : user.DesignationName)
+                            </span>
+                        </td>
+                        <td>
+                            @if (user.CurrentRole == "Admin")
+                            {
+                                <span class="role-badge role-admin"><i class="fa-solid fa-crown"></i> Admin</span>
+                            }
+                            else if (user.CurrentRole == "HR")
+                            {
+                                <span class="role-badge role-hr"><i class="fa-solid fa-user-tie"></i> HR</span>
+                            }
+                            else if (user.CurrentRole == "Employee")
+                            {
+                                <span class="role-badge role-employee"><i class="fa-solid fa-user"></i> Employee</span>
+                            }
+                            else
+                            {
+                                <span class="role-badge role-none"><i class="fa-solid fa-circle-question"></i> @user.CurrentRole</span>
+                            }
+                        </td>
+                        <td>
+                            @if (user.IsActive)
+                            {
+                                <span class="status-badge status-active">Active</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-terminated">Inactive</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="action-btns">
+                                <a asp-action="Assign" asp-route-id="@user.UserId"
+                                   class="action-btn action-btn-edit" title="Assign Role">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#rolesTable').DataTable({
+                responsive: true,
+                dom: "<'dt-toolbar'<'dt-toolbar-left'l><'dt-toolbar-right'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'dt-footer'<'dt-footer-left'i><'dt-footer-right'p>>",
+                language: {
+                    search: "",
+                    searchPlaceholder: "🔍  Search users...",
+                    lengthMenu: "Show _MENU_ rows",
+                    info: "Showing _START_–_END_ of _TOTAL_ users",
+                    paginate: { previous: "‹ Prev", next: "Next ›" }
+                }
+            });
+        });
+    </script>
+}

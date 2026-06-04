@@ -1757,3 +1757,149 @@ div.dataTables_wrapper div.dataTables_paginate .paginate_button.disabled:hover {
   color: #fff;
   box-shadow: 0 3px 8px rgba(239,68,68,0.3);
 }
+
+/* ============================================================
+   ROLE BADGES
+   ============================================================ */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.role-admin    { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.role-hr       { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+.role-employee { background: #e0f2fe; color: #0c4a6e; border: 1px solid #bae6fd; }
+.role-none     { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+/* ============================================================
+   ROLE USER CARD  (shown on Assign page)
+   ============================================================ */
+.role-user-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+}
+
+.role-user-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #818cf8);
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+}
+
+.role-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.role-user-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.role-user-email {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+/* ============================================================
+   ROLE PICKER  (radio-button style role selector)
+   ============================================================ */
+.role-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.role-option:hover {
+  border-color: #c5ccd8;
+  background: #fff;
+}
+
+.role-option.selected,
+.role-option input[type="radio"]:checked ~ * {
+  border-color: var(--primary);
+  background: #f4f4ff;
+}
+
+.role-option input[type="radio"] {
+  display: none;
+}
+
+.role-option-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+
+.role-option.selected .role-option-icon {
+  border-color: var(--primary);
+  background: #eef0ff;
+}
+
+.role-option-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.role-option-desc {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.role-option-check {
+  color: var(--primary);
+  font-size: 1.1rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.role-option.selected .role-option-check {
+  opacity: 1;
+}

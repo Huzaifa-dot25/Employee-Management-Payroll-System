@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using EMPS.Core.Entities;
@@ -18,38 +19,37 @@ namespace EMPS.Web.Controllers
     {
         private readonly ILeaveService _leaveService;
         private readonly IEmployeeService _employeeService;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
 
-        public LeaveController(ILeaveService leaveService, IEmployeeService employeeService, IMapper mapper)
+        public LeaveController(
+            ILeaveService leaveService,
+            IEmployeeService employeeService,
+            UserManager<ApplicationUser> userManager,
+            IMapper mapper)
         {
-            _leaveService = leaveService;
+            _leaveService    = leaveService;
             _employeeService = employeeService;
-            _mapper = mapper;
+            _userManager     = userManager;
+            _mapper          = mapper;
         }
 
         public async Task<IActionResult> Index()
         {
             IEnumerable<LeaveRequest> leaves;
+
             if (User.IsInRole("Admin") || User.IsInRole("HR"))
             {
                 leaves = await _leaveService.GetAllLeaveRequestsAsync();
             }
             else
             {
-                var employees = await _employeeService.GetAllEmployeesAsync();
-                var email = User.Identity?.Name;
-                var currentEmployee = employees.FirstOrDefault(e => e.Email == email);
-                
-                if (currentEmployee != null)
-                {
-                    leaves = await _leaveService.GetLeaveRequestsByEmployeeIdAsync(currentEmployee.Id);
-                }
-                else
-                {
-                    leaves = new List<LeaveRequest>();
-                }
+                var employeeId = await GetCurrentEmployeeIdAsync();
+                leaves = employeeId.HasValue
+                    ? await _leaveService.GetLeaveRequestsByEmployeeIdAsync(employeeId.Value)
+                    : new List<LeaveRequest>();
             }
-            
+
             var model = _mapper.Map<IEnumerable<LeaveRequestViewModel>>(leaves);
             return View(model);
         }
@@ -58,22 +58,18 @@ namespace EMPS.Web.Controllers
         public async Task<IActionResult> Create()
         {
             var model = new LeaveRequestViewModel { StartDate = DateTime.Today, EndDate = DateTime.Today };
-            
+
             if (User.IsInRole("Admin") || User.IsInRole("HR"))
             {
                 await PopulateEmployeesDropdownAsync();
             }
             else
             {
-                var employees = await _employeeService.GetAllEmployeesAsync();
-                var email = User.Identity?.Name;
-                var currentEmployee = employees.FirstOrDefault(e => e.Email == email);
-                if (currentEmployee != null)
-                {
-                    model.EmployeeId = currentEmployee.Id;
-                }
+                var employeeId = await GetCurrentEmployeeIdAsync();
+                if (employeeId.HasValue)
+                    model.EmployeeId = employeeId.Value;
             }
-            
+
             return View(model);
         }
 
@@ -90,44 +86,42 @@ namespace EMPS.Web.Controllers
                 return RedirectToAction(nameof(Index));
             }
             if (User.IsInRole("Admin") || User.IsInRole("HR"))
-            {
                 await PopulateEmployeesDropdownAsync(model.EmployeeId);
-            }
             return View(model);
         }
-        
+
         [Authorize(Roles = "Admin,HR")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             var leaveRequest = await _leaveService.GetLeaveRequestByIdAsync(id);
             if (leaveRequest == null) return NotFound();
-            
+
             var model = _mapper.Map<LeaveRequestViewModel>(leaveRequest);
             await PopulateEmployeesDropdownAsync(model.EmployeeId);
             return View(model);
         }
-        
+
         [Authorize(Roles = "Admin,HR")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, LeaveRequestViewModel model)
         {
             if (id != model.Id) return NotFound();
-            
+
             if (ModelState.IsValid)
             {
                 var leaveRequest = await _leaveService.GetLeaveRequestByIdAsync(id);
                 if (leaveRequest == null) return NotFound();
-                
+
                 _mapper.Map(model, leaveRequest);
-                
+
                 if (model.Status == "Approved" || model.Status == "Rejected")
                 {
                     leaveRequest.ApprovedBy = User.Identity?.Name;
                     leaveRequest.ApprovedAt = DateTime.UtcNow;
                 }
-                
+
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "System";
                 await _leaveService.UpdateLeaveRequestAsync(leaveRequest, userId);
                 TempData["SuccessMessage"] = "Leave request updated successfully.";
@@ -135,6 +129,17 @@ namespace EMPS.Web.Controllers
             }
             await PopulateEmployeesDropdownAsync(model.EmployeeId);
             return View(model);
+        }
+
+        // ── Helpers ──────────────────────────────────────────────────────────
+
+        private async Task<int?> GetCurrentEmployeeIdAsync()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return null;
+
+            var appUser = await _userManager.FindByIdAsync(userId);
+            return appUser?.EmployeeId;
         }
 
         private async Task PopulateEmployeesDropdownAsync(int? selectedEmployeeId = null)

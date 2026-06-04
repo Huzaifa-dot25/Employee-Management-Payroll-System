@@ -1,0 +1,149 @@
+@model EMPS.Web.Models.AssignRoleViewModel
+@{
+    ViewData["Title"] = "Assign Role";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+
+        <div class="form-page-header mb-4">
+            <div class="form-page-icon" style="background:linear-gradient(135deg,#dc2626,#f87171);">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <h4 class="form-page-title">Assign Role</h4>
+                <p class="form-page-sub">Change system access level for this user</p>
+            </div>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm ms-auto">
+                <i class="fa-solid fa-arrow-left me-1"></i>Back
+            </a>
+        </div>
+
+        <!-- User Info Card -->
+        <div class="role-user-card mb-4">
+            <div class="role-user-avatar">
+                @Model.FullName.Substring(0, 1).ToUpper()
+            </div>
+            <div class="role-user-info">
+                <div class="role-user-name">@Model.FullName</div>
+                <div class="role-user-email">@Model.Email</div>
+                @if (!string.IsNullOrEmpty(Model.EmployeeCode))
+                {
+                    <div class="mt-1">
+                        <span class="code-pill">@Model.EmployeeCode</span>
+                        @if (!string.IsNullOrEmpty(Model.DepartmentName))
+                        {
+                            <span class="dept-tag ms-1">@Model.DepartmentName</span>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="ms-auto">
+                <div class="text-muted" style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Current Role</div>
+                @if (Model.CurrentRole == "Admin")
+                {
+                    <span class="role-badge role-admin"><i class="fa-solid fa-crown"></i> @Model.CurrentRole</span>
+                }
+                else if (Model.CurrentRole == "HR")
+                {
+                    <span class="role-badge role-hr"><i class="fa-solid fa-user-tie"></i> @Model.CurrentRole</span>
+                }
+                else
+                {
+                    <span class="role-badge role-employee"><i class="fa-solid fa-user"></i> @Model.CurrentRole</span>
+                }
+            </div>
+        </div>
+
+        <div class="form-card">
+            <form asp-action="Assign" method="post">
+                <input type="hidden" asp-for="UserId" />
+                <input type="hidden" asp-for="FullName" />
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" asp-for="CurrentRole" />
+
+                <div class="form-field-group mb-5">
+                    <div class="form-section-label">
+                        <i class="fa-solid fa-shield-halved"></i> New Role
+                    </div>
+                    <p class="text-muted mb-3" style="font-size:.825rem;">
+                        Select the role that best matches this user's responsibilities. Role changes take effect on their next login.
+                    </p>
+
+                    <div class="role-picker">
+                        @foreach (var role in Model.AvailableRoles)
+                        {
+                            <label class="role-option @(Model.SelectedRole == role ? "selected" : "")">
+                                <input type="radio" name="SelectedRole" value="@role"
+                                       @(Model.SelectedRole == role ? "checked" : "") />
+                                <div class="role-option-icon">
+                                    @if (role == "Admin")
+                                    {
+                                        <i class="fa-solid fa-crown" style="color:#dc2626;"></i>
+                                    }
+                                    else if (role == "HR")
+                                    {
+                                        <i class="fa-solid fa-user-tie" style="color:#7c3aed;"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-user" style="color:#0ea5e9;"></i>
+                                    }
+                                </div>
+                                <div>
+                                    <div class="role-option-name">@role</div>
+                                    <div class="role-option-desc">
+                                        @if (role == "Admin")
+                                        {
+                                            <span>Full system access — manage users, roles, all data</span>
+                                        }
+                                        else if (role == "HR")
+                                        {
+                                            <span>HR access — manage employees, attendance, leave &amp; payroll</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Employee access — view own attendance, leaves &amp; payslips only</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="role-option-check ms-auto">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                    <span asp-validation-for="SelectedRole" class="field-error mt-2"></span>
+                </div>
+
+                @if (Model.CurrentRole == "Admin")
+                {
+                    <div class="alert alert-warning mb-4" style="font-size:.825rem;">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                        You are reassigning an <strong>Admin</strong> user. Ensure at least one Admin remains in the system.
+                    </div>
+                }
+
+                <div class="form-actions">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-5">
+                        <i class="fa-solid fa-shield-halved me-2"></i>Save Role
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Highlight selected role option on click
+        document.querySelectorAll('.role-option input[type="radio"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                document.querySelectorAll('.role-option').forEach(el => el.classList.remove('selected'));
+                this.closest('.role-option').classList.add('selected');
+            });
+        });
+    </script>
+}

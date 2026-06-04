@@ -97,6 +97,16 @@
                             <span>Reports</span>
                         </a>
                     </li>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li class="sidebar-section-label">System</li>
+                        <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "UserRole" ? "active" : "")">
+                            <a class="sidebar-link" asp-controller="UserRole" asp-action="Index">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <span>Role Management</span>
+                            </a>
+                        </li>
+                    }
                 </ul>
             </aside>
         }
