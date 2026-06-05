@@ -8,71 +8,565 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - Employee Payroll System</title>
-    <!-- Google Fonts -->
+    <title>Sign In — EMPS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <!-- Bootstrap -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <!-- Custom site.css styling -->
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            background: #0a0c14;
+            overflow: hidden;
+        }
+
+        /* ── Left panel ── */
+        .login-left {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 48px 56px;
+            background: linear-gradient(145deg, #0f1122 0%, #1a1040 60%, #0f1122 100%);
+            overflow: hidden;
+        }
+
+        /* Decorative blobs */
+        .login-left::before {
+            content: '';
+            position: absolute;
+            top: -120px; left: -120px;
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .login-left::after {
+            content: '';
+            position: absolute;
+            bottom: -100px; right: -80px;
+            width: 420px; height: 420px;
+            background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Floating grid dots */
+        .login-left .grid-dots {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+        }
+
+        .brand-mark {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand-mark-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; color: #fff;
+            box-shadow: 0 6px 20px rgba(79,70,229,0.5);
+        }
+
+        .brand-mark-name {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.2px;
+        }
+
+        .brand-mark-tagline {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Hero content */
+        .login-hero {
+            position: relative;
+            z-index: 2;
+        }
+
+        .login-hero-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99,102,241,0.18);
+            border: 1px solid rgba(99,102,241,0.3);
+            color: #a5b4fc;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .login-hero h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.1;
+            letter-spacing: -1px;
+            margin-bottom: 18px;
+        }
+
+        .login-hero h1 span {
+            background: linear-gradient(90deg, #818cf8, #c4b5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .login-hero p {
+            font-size: 0.925rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.7;
+            max-width: 380px;
+        }
+
+        /* Feature pills */
+        .feature-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 28px;
+        }
+
+        .feature-pill {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.65);
+        }
+
+        .feature-pill i { color: #818cf8; font-size: 0.8rem; }
+
+        /* Footer text */
+        .login-left-footer {
+            position: relative;
+            z-index: 2;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.25);
+        }
+
+        /* ── Right panel (form) ── */
+        .login-right {
+            width: 480px;
+            flex-shrink: 0;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 56px 48px;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        /* Top accent bar */
+        .login-right::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4f46e5, #818cf8, #c4b5fd);
+        }
+
+        .form-header {
+            margin-bottom: 36px;
+        }
+
+        .form-header-step {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #4f46e5;
+            margin-bottom: 10px;
+        }
+
+        .form-header h2 {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: #111827;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .form-header p {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        /* Field */
+        .field-wrap {
+            margin-bottom: 20px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 7px;
+            letter-spacing: 0.1px;
+        }
+
+        .field-input-wrap {
+            position: relative;
+        }
+
+        .field-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 0.875rem;
+            pointer-events: none;
+            transition: color 0.15s;
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 11px 14px 11px 40px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-family: 'Inter', sans-serif;
+            color: #111827;
+            background: #fafafa;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+        }
+
+        .field-input:focus {
+            border-color: #4f46e5;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(79,70,229,0.1);
+        }
+
+        .field-input:focus + .field-icon,
+        .field-input-wrap:focus-within .field-icon {
+            color: #4f46e5;
+        }
+
+        /* Password toggle */
+        .field-toggle {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 3px;
+            font-size: 0.875rem;
+            transition: color 0.15s;
+        }
+
+        .field-toggle:hover { color: #4f46e5; }
+
+        .field-error {
+            display: block;
+            font-size: 0.75rem;
+            color: #ef4444;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        /* Validation summary */
+        .form-error-box {
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            border-left: 4px solid #ef4444;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            color: #9b1c1c;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        /* Remember me row */
+        .remember-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .remember-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .remember-check input[type="checkbox"] {
+            width: 16px; height: 16px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 4px;
+            accent-color: #4f46e5;
+            cursor: pointer;
+        }
+
+        .remember-check span {
+            font-size: 0.825rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* Submit button */
+        .btn-signin {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(79,70,229,0.4);
+            transition: all 0.2s;
+            letter-spacing: 0.1px;
+            margin-bottom: 24px;
+        }
+
+        .btn-signin:hover {
+            background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
+            box-shadow: 0 6px 22px rgba(79,70,229,0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-signin:active { transform: translateY(0); }
+
+        /* Demo credentials */
+        .demo-box {
+            background: #f8f9ff;
+            border: 1px solid #e0e4ff;
+            border-radius: 10px;
+            padding: 13px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .demo-box-icon {
+            width: 28px; height: 28px;
+            border-radius: 7px;
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .demo-box-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .demo-cred {
+            font-size: 0.72rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 2px;
+        }
+
+        .demo-cred code {
+            background: #eef0ff;
+            color: #4f46e5;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .login-left { display: none; }
+            .login-right { width: 100%; padding: 40px 28px; }
+        }
+    </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="text-center mb-4">
-                <div class="d-inline-flex align-items-center justify-content-center mb-3"
-                     style="width:58px;height:58px;border-radius:14px;background:linear-gradient(135deg,#4f46e5,#818cf8);box-shadow:0 8px 20px rgba(79,70,229,0.45);">
-                    <i class="fa-solid fa-wallet text-white" style="font-size:1.5rem;"></i>
-                </div>
-                <h2 class="fw-800 text-main m-0" style="font-size:1.55rem;letter-spacing:-0.3px;">Welcome back</h2>
-                <p class="text-muted mt-1 mb-0" style="font-size:0.875rem;">Sign in to your EMPS account</p>
+
+    <!-- Left decorative panel -->
+    <div class="login-left">
+        <div class="grid-dots"></div>
+
+        <!-- Brand -->
+        <div class="brand-mark">
+            <div class="brand-mark-icon"><i class="fa-solid fa-wallet"></i></div>
+            <div>
+                <div class="brand-mark-name">EMPS</div>
+                <div class="brand-mark-tagline">Payroll System</div>
             </div>
+        </div>
 
-            <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 0.85rem;"></div>
-
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label form-label-custom">Email Address</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 8px 0 0 8px; border-color: var(--border-color);"><i class="fa-solid fa-envelope"></i></span>
-                        <input asp-for="Email" class="form-control form-control-custom border-start-0" style="border-radius: 0 8px 8px 0;" placeholder="name@company.com" autocomplete="username" />
-                    </div>
-                    <span asp-validation-for="Email" class="text-danger" style="font-size: 0.8rem;"></span>
-                </div>
-
-                <div class="mb-4">
-                    <label asp-for="Password" class="form-label form-label-custom">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 text-muted" style="border-radius: 8px 0 0 8px; border-color: var(--border-color);"><i class="fa-solid fa-lock"></i></span>
-                        <input asp-for="Password" class="form-control form-control-custom border-start-0" style="border-radius: 0 8px 8px 0;" placeholder="••••••••" autocomplete="current-password" />
-                    </div>
-                    <span asp-validation-for="Password" class="text-danger" style="font-size: 0.8rem;"></span>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mb-4" style="font-size: 0.9rem;">
-                    <div class="form-check">
-                        <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label text-muted">Remember me</label>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100 fw-semibold" style="padding:10px;font-size:0.9rem;">
-                    <i class="fa-solid fa-right-to-bracket me-2"></i>Sign In
-                </button>
-            </form>
-
-            <div class="text-center mt-4 border-top pt-3" style="font-size:0.78rem;color:#9ca3af;">
-                <p class="m-0">Demo: <code style="font-size:0.75rem;">admin@emps.com</code> / <code style="font-size:0.75rem;">Admin@123</code></p>
+        <!-- Hero -->
+        <div class="login-hero">
+            <div class="login-hero-label">
+                <i class="fa-solid fa-circle" style="font-size:.4rem;"></i>
+                Enterprise Platform
             </div>
+            <h1>Manage your<br>workforce <span>smarter</span></h1>
+            <p>All-in-one employee management — payroll, attendance, leaves, and reporting in one secure platform.</p>
+
+            <div class="feature-pills">
+                <div class="feature-pill"><i class="fa-solid fa-users"></i> Employee Directory</div>
+                <div class="feature-pill"><i class="fa-solid fa-calendar-check"></i> Attendance Tracking</div>
+                <div class="feature-pill"><i class="fa-solid fa-receipt"></i> Payroll Processing</div>
+                <div class="feature-pill"><i class="fa-solid fa-business-time"></i> Leave Management</div>
+                <div class="feature-pill"><i class="fa-solid fa-chart-line"></i> Reports</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="login-left-footer">
+            © @DateTime.Now.Year EMPS — Employee Management & Payroll System
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Right form panel -->
+    <div class="login-right">
+
+        <div class="form-header">
+            <div class="form-header-step">Step 1 of 1 — Authentication</div>
+            <h2>Welcome back 👋</h2>
+            <p>Sign in to your account to continue</p>
+        </div>
+
+        <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" autocomplete="on">
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="form-error-box">
+                    <i class="fa-solid fa-circle-xmark me-2"></i>
+                    <div asp-validation-summary="ModelOnly"></div>
+                </div>
+            }
+
+            <!-- Email -->
+            <div class="field-wrap">
+                <label asp-for="Email" class="field-label">Email address</label>
+                <div class="field-input-wrap">
+                    <input asp-for="Email"
+                           class="field-input"
+                           placeholder="you@company.com"
+                           autocomplete="username"
+                           type="email" />
+                    <i class="fa-solid fa-envelope field-icon"></i>
+                </div>
+                <span asp-validation-for="Email" class="field-error"></span>
+            </div>
+
+            <!-- Password -->
+            <div class="field-wrap">
+                <label asp-for="Password" class="field-label">Password</label>
+                <div class="field-input-wrap">
+                    <input asp-for="Password"
+                           class="field-input"
+                           placeholder="Enter your password"
+                           autocomplete="current-password"
+                           id="passwordInput"
+                           type="password"
+                           style="padding-right: 42px;" />
+                    <i class="fa-solid fa-lock field-icon"></i>
+                    <button type="button" class="field-toggle" id="togglePassword" tabindex="-1" title="Show/hide password">
+                        <i class="fa-regular fa-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="Password" class="field-error"></span>
+            </div>
+
+            <!-- Remember me -->
+            <div class="remember-row">
+                <label class="remember-check">
+                    <input asp-for="RememberMe" type="checkbox" />
+                    <span>Keep me signed in</span>
+                </label>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-signin">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                Sign in to EMPS
+            </button>
+
+            <!-- Demo credentials -->
+            <div class="demo-box">
+                <div class="demo-box-icon"><i class="fa-solid fa-key"></i></div>
+                <div>
+                    <div class="demo-box-title">Demo credentials</div>
+                    <div class="demo-cred">
+                        <span>Email:</span>
+                        <code>admin@emps.com</code>
+                    </div>
+                    <div class="demo-cred">
+                        <span>Password:</span>
+                        <code>Admin@123</code>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Password visibility toggle
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const input = document.getElementById('passwordInput');
+            const icon  = document.getElementById('toggleIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+    </script>
 </body>
 </html>
