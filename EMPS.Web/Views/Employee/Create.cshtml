@@ -180,7 +180,8 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function () {
-            // Photo Preview Handler
+
+            // ── Photo Preview ────────────────────────────────────────
             $('#imageFileInput').on('change', function () {
                 const file = this.files[0];
                 if (file) {
@@ -188,35 +189,39 @@
                     reader.onload = function (e) {
                         $('#imagePreview').attr('src', e.target.result).removeClass('d-none');
                         $('#imagePreviewIcon').addClass('d-none');
-                    }
+                    };
                     reader.readAsDataURL(file);
                 }
             });
 
-            // Dynamic Designation Dropdown Loading
-            $('#deptSelect').on('change', function () {
-                var deptId = $(this).val();
+            // ── Designation loader ────────────────────────────────────
+            function loadDesignations(deptId, selectedDesigId) {
                 var desigSelect = $('#desigSelect');
-                desigSelect.empty().append('<option value="">-- Loading Designations --</option>');
-
-                if (deptId) {
-                    $.ajax({
-                        url: '/Designation/GetByDepartment',
-                        type: 'GET',
-                        data: { departmentId: deptId },
-                        success: function (data) {
-                            desigSelect.empty().append('<option value="">-- Select Designation --</option>');
-                            $.each(data, function (index, item) {
-                                desigSelect.append('<option value="' + item.id + '">' + item.name + '</option>');
-                            });
-                        },
-                        error: function () {
-                            desigSelect.empty().append('<option value="">-- Error Loading Designations --</option>');
-                        }
-                    });
-                } else {
+                if (!deptId) {
                     desigSelect.empty().append('<option value="">-- Select Department First --</option>');
+                    return;
                 }
+                desigSelect.empty().append('<option value="">Loading…</option>');
+                $.ajax({
+                    url: '/Designation/GetByDepartment',
+                    type: 'GET',
+                    data: { departmentId: deptId },
+                    success: function (data) {
+                        desigSelect.empty().append('<option value="">-- Select Designation --</option>');
+                        $.each(data, function (i, item) {
+                            var opt = $('<option>').val(item.id).text(item.name);
+                            if (selectedDesigId && item.id == selectedDesigId) opt.prop('selected', true);
+                            desigSelect.append(opt);
+                        });
+                    },
+                    error: function () {
+                        desigSelect.empty().append('<option value="">-- Error loading designations --</option>');
+                    }
+                });
+            }
+
+            $('#deptSelect').on('change', function () {
+                loadDesignations($(this).val(), null);
             });
         });
     </script>

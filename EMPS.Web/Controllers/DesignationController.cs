@@ -113,8 +113,12 @@ namespace EMPS.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // This endpoint must be accessible to ALL authenticated users (Admin, HR, and Employee)
+        // because the Employee enrollment form is used when creating employees.
+        // The controller-level [Authorize(Roles="Admin,HR")] is overridden here with a
+        // broader policy so the AJAX call succeeds for any logged-in user.
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<JsonResult> GetByDepartment(int departmentId)
         {
             var designations = await _designationService.GetDesignationsByDepartmentAsync(departmentId);
