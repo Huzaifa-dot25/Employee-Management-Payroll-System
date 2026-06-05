@@ -210,7 +210,7 @@
                 }
                 desigSelect.empty().append('<option value="">Loading…</option>');
                 $.ajax({
-                    url: '/Designation/GetByDepartment',
+                    url: '/Lookup/DesignationsByDepartment',
                     type: 'GET',
                     data: { departmentId: deptId },
                     success: function (data) {
