@@ -206,7 +206,7 @@
                                 foreach (var leave in Model.RecentLeaves)
                                 {
                                     <tr>
-                                        <td class="fw-semibold">@leave.Employee?.FullName</td>
+                                        <td class="fw-semibold">@leave.EmployeeName</td>
                                         <td>@leave.LeaveType</td>
                                         <td>@leave.StartDate.ToString("MM/dd") - @leave.EndDate.ToString("MM/dd")</td>
                                         <td>

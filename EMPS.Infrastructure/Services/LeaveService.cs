@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +18,7 @@ namespace EMPS.Infrastructure.Services
 
         public async Task<IEnumerable<LeaveRequest>> GetAllLeaveRequestsAsync()
         {
-            var leaves = await _unitOfWork.LeaveRequests.GetAllAsync();
+            var leaves = await _unitOfWork.LeaveRequests.GetAllWithIncludesAsync(l => l.Employee);
             return leaves.OrderByDescending(l => l.StartDate);
         }
 

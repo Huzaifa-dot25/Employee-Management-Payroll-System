@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using EMPS.Core.Entities;
 
 namespace EMPS.Web.Models
 {
@@ -10,12 +9,13 @@ namespace EMPS.Web.Models
         public decimal TotalSalaryPaid { get; set; }
         public int PendingLeaveRequests { get; set; }
         public int PresentToday { get; set; }
-        
+
         public IEnumerable<EmployeeViewModel> RecentEmployees { get; set; } = new List<EmployeeViewModel>();
-        public IEnumerable<LeaveRequest> RecentLeaves { get; set; } = new List<LeaveRequest>();
-        
-        // Chart Data Lists
-        public List<string> MonthlyLabels { get; set; } = new();
+
+        // Use ViewModel (not entity) so Employee nav data is resolved by AutoMapper
+        public IEnumerable<LeaveRequestViewModel> RecentLeaves { get; set; } = new List<LeaveRequestViewModel>();
+
+        public List<string>  MonthlyLabels        { get; set; } = new();
         public List<decimal> MonthlySalaryPayouts { get; set; } = new();
     }
 }

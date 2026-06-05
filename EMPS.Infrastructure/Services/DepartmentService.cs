@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +18,8 @@ namespace EMPS.Infrastructure.Services
 
         public async Task<IEnumerable<Department>> GetAllDepartmentsAsync()
         {
-            return await _unitOfWork.Departments.GetAllAsync();
+            // Include Employees so EmployeeCount is available via AutoMapper
+            return await _unitOfWork.Departments.GetAllWithIncludesAsync(d => d.Employees);
         }
 
         public async Task<Department?> GetDepartmentByIdAsync(int id)
@@ -51,12 +51,11 @@ namespace EMPS.Infrastructure.Services
 
         public async Task<bool> DepartmentExistsAsync(string code, int? excludeId = null)
         {
-            var results = await _unitOfWork.Departments.FindAsync(d => d.Code.ToLower() == code.ToLower());
-            if (excludeId.HasValue)
-            {
-                return results.Any(d => d.Id != excludeId.Value);
-            }
-            return results.Any();
+            var results = await _unitOfWork.Departments.FindAsync(
+                d => d.Code.ToLower() == code.ToLower());
+            return excludeId.HasValue
+                ? results.Any(d => d.Id != excludeId.Value)
+                : results.Any();
         }
     }
 }

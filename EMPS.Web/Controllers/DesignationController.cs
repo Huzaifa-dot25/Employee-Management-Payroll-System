@@ -118,7 +118,8 @@ namespace EMPS.Web.Controllers
         public async Task<JsonResult> GetByDepartment(int departmentId)
         {
             var designations = await _designationService.GetDesignationsByDepartmentAsync(departmentId);
-            return Json(designations);
+            var result = designations.Select(d => new { id = d.Id, name = d.Name });
+            return Json(result);
         }
 
         private async Task PopulateDepartmentsSelectListAsync(object? selectedValue = null)

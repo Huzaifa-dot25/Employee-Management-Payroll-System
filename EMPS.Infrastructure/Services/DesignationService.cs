@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using EMPS.Core.Entities;
 using EMPS.Core.Interfaces;
@@ -19,14 +17,16 @@ namespace EMPS.Infrastructure.Services
 
         public async Task<IEnumerable<Designation>> GetAllDesignationsAsync()
         {
-            // We want to include Department info, so custom fetching might be needed if generic repository doesn't include it.
-            // But since Department is configured, let's fetch designations.
-            return await _unitOfWork.Designations.GetAllAsync();
+            // Include Department so DepartmentName is available for display
+            return await _unitOfWork.Designations.GetAllWithIncludesAsync(
+                d => d.Department,
+                d => d.Employees);
         }
 
         public async Task<Designation?> GetDesignationByIdAsync(int id)
         {
-            return await _unitOfWork.Designations.GetByIdAsync(id);
+            return await _unitOfWork.Designations.GetByIdWithIncludesAsync(id,
+                d => d.Department);
         }
 
         public async Task CreateDesignationAsync(Designation designation, string userId)

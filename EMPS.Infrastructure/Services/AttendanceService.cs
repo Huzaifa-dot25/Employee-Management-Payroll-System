@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +18,7 @@ namespace EMPS.Infrastructure.Services
 
         public async Task<IEnumerable<Attendance>> GetAllAttendancesAsync()
         {
-            var attendances = await _unitOfWork.Attendances.GetAllAsync();
+            var attendances = await _unitOfWork.Attendances.GetAllWithIncludesAsync(a => a.Employee);
             return attendances.OrderByDescending(a => a.Date);
         }
 

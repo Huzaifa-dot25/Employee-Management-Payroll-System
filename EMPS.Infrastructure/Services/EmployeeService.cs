@@ -19,26 +19,30 @@ namespace EMPS.Infrastructure.Services
 
         public async Task<IEnumerable<Employee>> GetAllEmployeesAsync()
         {
-            return await _unitOfWork.Employees.GetAllAsync();
+            return await _unitOfWork.Employees.GetAllWithIncludesAsync(
+                e => e.Department,
+                e => e.Designation);
         }
 
         public async Task<Employee?> GetEmployeeByIdAsync(int id)
         {
-            return await _unitOfWork.Employees.GetByIdAsync(id);
+            return await _unitOfWork.Employees.GetByIdWithIncludesAsync(id,
+                e => e.Department,
+                e => e.Designation);
         }
 
         public async Task<Employee?> GetEmployeeByCodeAsync(string code)
         {
-            var results = await _unitOfWork.Employees.FindAsync(e => e.EmployeeCode.ToLower() == code.ToLower());
+            var results = await _unitOfWork.Employees.FindAsync(
+                e => e.EmployeeCode.ToLower() == code.ToLower());
             return results.FirstOrDefault();
         }
 
         public async Task CreateEmployeeAsync(Employee employee, string userId)
         {
             if (string.IsNullOrWhiteSpace(employee.EmployeeCode))
-            {
                 employee.EmployeeCode = await GenerateEmployeeCodeAsync();
-            }
+
             await _unitOfWork.Employees.AddAsync(employee);
             await _unitOfWork.SaveChangesAsync(userId);
         }
@@ -62,23 +66,17 @@ namespace EMPS.Infrastructure.Services
         public async Task<string> GenerateEmployeeCodeAsync()
         {
             var allEmployees = await _unitOfWork.Employees.GetAllAsync();
-            var lastEmployee = allEmployees
+            var last = allEmployees
                 .Where(e => e.EmployeeCode.StartsWith("EMP-"))
                 .OrderByDescending(e => e.EmployeeCode)
                 .FirstOrDefault();
 
-            if (lastEmployee == null)
-            {
-                return "EMP-0001";
-            }
+            if (last == null) return "EMP-0001";
 
-            string numericPart = lastEmployee.EmployeeCode.Substring(4);
-            if (int.TryParse(numericPart, out int number))
-            {
-                return $"EMP-{(number + 1):D4}";
-            }
-
-            return $"EMP-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}";
+            string num = last.EmployeeCode.Substring(4);
+            return int.TryParse(num, out int n)
+                ? $"EMP-{(n + 1):D4}"
+                : $"EMP-{Guid.NewGuid().ToString().Substring(0, 4).ToUpper()}";
         }
     }
 }

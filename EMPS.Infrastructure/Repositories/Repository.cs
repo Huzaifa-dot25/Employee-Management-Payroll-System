@@ -36,6 +36,38 @@ namespace EMPS.Infrastructure.Repositories
             return await _dbSet.Where(predicate).ToListAsync();
         }
 
+        /// <summary>Returns all entities with specified navigation properties included.</summary>
+        public virtual async Task<IEnumerable<T>> GetAllWithIncludesAsync(
+            params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+            foreach (var include in includes)
+                query = query.Include(include);
+            return await query.ToListAsync();
+        }
+
+        /// <summary>Returns entities matching predicate with specified navigation properties included.</summary>
+        public virtual async Task<IEnumerable<T>> FindWithIncludesAsync(
+            Expression<Func<T, bool>> predicate,
+            params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet.Where(predicate);
+            foreach (var include in includes)
+                query = query.Include(include);
+            return await query.ToListAsync();
+        }
+
+        /// <summary>Returns a single entity by id with specified navigation properties included.</summary>
+        public virtual async Task<T?> GetByIdWithIncludesAsync(
+            int id,
+            params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _dbSet;
+            foreach (var include in includes)
+                query = query.Include(include);
+            return await query.FirstOrDefaultAsync(e => e.Id == id);
+        }
+
         public virtual async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);

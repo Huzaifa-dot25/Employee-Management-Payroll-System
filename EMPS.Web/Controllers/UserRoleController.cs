@@ -31,7 +31,7 @@ namespace EMPS.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var allUsers  = _userManager.Users.ToList();
-            var employees = (await _employeeService.GetAllEmployeesAsync()).ToList();
+            var employees = (await _employeeService.GetAllEmployeesAsync()).ToList(); // already includes Dept/Desig
             var model     = new List<UserRoleViewModel>();
 
             foreach (var user in allUsers)

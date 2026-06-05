@@ -1,6 +1,8 @@
 @model IEnumerable<EMPS.Web.Models.DesignationViewModel>
 @{
     ViewData["Title"] = "Designations";
+    var modelList = Model.ToList();
+    decimal avgSalary = modelList.Any() ? modelList.Average(d => d.BasicSalary) : 0;
 }
 
 <div class="module-header">
@@ -21,17 +23,17 @@
 
 <div class="module-stats-strip mb-4">
     <div class="mss-item">
-        <span class="mss-value">@Model.Count()</span>
+        <span class="mss-value">@modelList.Count()</span>
         <span class="mss-label">Total Designations</span>
     </div>
     <div class="mss-divider"></div>
     <div class="mss-item">
-        <span class="mss-value">$@Model.Average(d => d.BasicSalary).ToString("N0")</span>
+        <span class="mss-value">$@avgSalary.ToString("N0")</span>
         <span class="mss-label">Avg. Basic Salary</span>
     </div>
     <div class="mss-divider"></div>
     <div class="mss-item">
-        <span class="mss-value">@Model.Select(d => d.DepartmentName).Distinct().Count()</span>
+        <span class="mss-value">@modelList.Select(d => d.DepartmentName).Distinct().Count()</span>
         <span class="mss-label">Departments Covered</span>
     </div>
 </div>
