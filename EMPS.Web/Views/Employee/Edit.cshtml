@@ -138,6 +138,7 @@
                             <div>
                                 <label asp-for="DesignationId" class="form-label form-label-custom">Designation</label>
                                 <select asp-for="DesignationId" class="form-select form-control-custom" id="desigSelect" asp-items="ViewBag.Designations">
+                                    <option value="">-- Select Designation --</option>
                                 </select>
                                 <span asp-validation-for="DesignationId" class="text-danger" style="font-size: 0.8rem;"></span>
                             </div>
@@ -210,7 +211,7 @@
                 }
                 desigSelect.empty().append('<option value="">Loading…</option>');
                 $.ajax({
-                    url: '/Lookup/DesignationsByDepartment',
+                    url: '@Url.Action("DesignationsByDepartment", "Lookup")',
                     type: 'GET',
                     data: { departmentId: deptId },
                     success: function (data) {
@@ -231,14 +232,6 @@
             $('#deptSelect').on('change', function () {
                 loadDesignations($(this).val(), null);
             });
-
-            // On page load: if a department is already selected, load its designations
-            // and re-select the current designation value
-            var initialDeptId   = $('#deptSelect').val();
-            var initialDesigId  = @Model.DesignationId;
-            if (initialDeptId) {
-                loadDesignations(initialDeptId, initialDesigId);
-            }
         });
     </script>
 }

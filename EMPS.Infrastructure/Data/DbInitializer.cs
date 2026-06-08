@@ -47,6 +47,19 @@ namespace EMPS.Infrastructure.Data
                     await userManager.AddToRoleAsync(user, "Admin");
                 }
             }
+
+            // Seed some default Designations for IT Department if none exist
+            var itDept = context.Departments.FirstOrDefault(d => d.Name == "IT");
+            if (itDept != null && !context.Designations.Any(d => d.DepartmentId == itDept.Id))
+            {
+                context.Designations.AddRange(
+                    new Designation { Name = "Software Engineer", SalaryGrade = "A", BasicSalary = 60000, DepartmentId = itDept.Id },
+                    new Designation { Name = "Senior Software Engineer", SalaryGrade = "B", BasicSalary = 85000, DepartmentId = itDept.Id },
+                    new Designation { Name = "System Administrator", SalaryGrade = "A", BasicSalary = 55000, DepartmentId = itDept.Id },
+                    new Designation { Name = "IT Manager", SalaryGrade = "C", BasicSalary = 105000, DepartmentId = itDept.Id }
+                );
+                await context.SaveChangesAsync();
+            }
         }
     }
 }
