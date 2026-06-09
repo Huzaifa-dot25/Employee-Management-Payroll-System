@@ -4,6 +4,7 @@
 }
 
 <form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
     <div class="row g-4 mb-4">
         <!-- Main Form Left Side -->
         <div class="col-12 col-lg-8">
@@ -223,6 +224,13 @@
             $('#deptSelect').on('change', function () {
                 loadDesignations($(this).val(), null);
             });
+
+            // Initialize designations if a department is already selected (e.g. after validation error)
+            var initialDeptId = $('#deptSelect').val();
+            var initialDesigId = '@Model?.DesignationId';
+            if (initialDeptId) {
+                loadDesignations(initialDeptId, initialDesigId || null);
+            }
         });
     </script>
 }

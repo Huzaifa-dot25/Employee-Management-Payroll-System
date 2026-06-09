@@ -158,7 +158,7 @@ namespace EMPS.Infrastructure.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Action).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.EntityName).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.EntityId).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.EntityId).IsRequired().HasMaxLength(255);
             });
         }
 
