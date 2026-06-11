@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using EMPS.Core.Entities;
 using EMPS.Core.Interfaces.Services;
 using EMPS.Web.Models;
+using EMPS.Web.Services;
+using QuestPDF.Fluent;
+using QuestPDF.Infrastructure;
 using System.Linq;
 
 namespace EMPS.Web.Controllers
@@ -122,6 +125,35 @@ namespace EMPS.Web.Controllers
             }
 
             return View(new List<PayrollViewModel>());
+        }
+
+        // ── Download PDF ─────────────────────────────────────────────────────
+
+        [HttpGet]
+        public async Task<IActionResult> DownloadPayslip(int payrollId)
+        {
+            var payroll = await _payrollService.GetPayrollByIdAsync(payrollId);
+            if (payroll == null) return NotFound();
+
+            // Employees can only download their own payslip
+            if (User.IsInRole("Employee"))
+            {
+                var empId = await GetCurrentEmployeeIdAsync();
+                if (!empId.HasValue || empId.Value != payroll.EmployeeId)
+                    return Forbid();
+            }
+
+            if (payroll.Status != "Paid" || payroll.Payslip == null)
+                return BadRequest("Payslip is only available for Paid payrolls.");
+
+            // Set QuestPDF community licence (free, no watermark for OSS/community use)
+            QuestPDF.Settings.License = LicenseType.Community;
+
+            var document  = new PayslipDocument(payroll);
+            var pdfBytes  = document.GeneratePdf();
+            var fileName  = $"Payslip-{payroll.Payslip.PayslipCode}.pdf";
+
+            return File(pdfBytes, "application/pdf", fileName);
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────

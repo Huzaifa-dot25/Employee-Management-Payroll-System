@@ -43,10 +43,13 @@ namespace EMPS.Web.Mapping
 
             // Payroll Mappings
             CreateMap<Payroll, PayrollViewModel>()
-                .ForMember(dest => dest.EmployeeName, opt => opt.MapFrom(src => src.Employee != null ? src.Employee.FullName : null))
+                .ForMember(dest => dest.EmployeeName,  opt => opt.MapFrom(src => src.Employee != null ? src.Employee.FullName : null))
+                .ForMember(dest => dest.HasPayslip,    opt => opt.MapFrom(src => src.Payslip != null))
+                .ForMember(dest => dest.PayslipId,     opt => opt.MapFrom(src => src.Payslip != null ? (int?)src.Payslip.Id : null))
+                .ForMember(dest => dest.PayslipCode,   opt => opt.MapFrom(src => src.Payslip != null ? src.Payslip.PayslipCode : null))
                 .ReverseMap()
                 .ForMember(dest => dest.Employee, opt => opt.Ignore())
-                .ForMember(dest => dest.Payslip, opt => opt.Ignore());
+                .ForMember(dest => dest.Payslip,  opt => opt.Ignore());
         }
     }
 }

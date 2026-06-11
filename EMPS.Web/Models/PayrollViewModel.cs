@@ -51,5 +51,10 @@ namespace EMPS.Web.Models
         
         [Display(Name = "Payment Method")]
         public string? PaymentMethod { get; set; }
+
+        // Payslip info (populated from Payroll.Payslip navigation)
+        public bool HasPayslip { get; set; }
+        public int? PayslipId { get; set; }
+        public string? PayslipCode { get; set; }
     }
 }

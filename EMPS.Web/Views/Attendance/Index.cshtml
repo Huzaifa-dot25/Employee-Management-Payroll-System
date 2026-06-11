@@ -13,7 +13,7 @@
             <i class="fa-solid fa-calendar-check"></i>
         </div>
         <div>
-            <h3 class="module-title">Attendance Log</h3>
+            <h3 class="module-title">Attendance</h3>
             <p class="module-sub">Track and manage employee attendance records</p>
         </div>
     </div>
@@ -25,6 +25,33 @@
         </a>
     }
 </div>
+
+{{-- Module nav tabs --}}
+<ul class="nav nav-tabs mb-4" style="border-bottom:2px solid #e5e7eb;">
+    <li class="nav-item">
+        <a class="nav-link active fw-semibold" asp-action="Index">
+            <i class="fa-solid fa-list me-1"></i>Attendance Log
+        </a>
+    </li>
+    @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-action="Daily">
+                <i class="fa-solid fa-calendar-day me-1"></i>Daily
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-action="MonthlyReport">
+                <i class="fa-solid fa-chart-bar me-1"></i>Monthly Report
+            </a>
+        </li>
+    }
+    <li class="nav-item">
+        <a class="nav-link" asp-action="EmployeeHistory">
+            <i class="fa-solid fa-clock-rotate-left me-1"></i>Employee History
+        </a>
+    </li>
+</ul>
 
 <div class="module-stats-strip mb-4">
     <div class="mss-item">

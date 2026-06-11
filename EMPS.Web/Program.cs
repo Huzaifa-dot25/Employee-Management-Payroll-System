@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using QuestPDF.Infrastructure;
 using EMPS.Core.Entities;
 using EMPS.Core.Interfaces;
 using EMPS.Core.Interfaces.Services;
@@ -8,6 +9,9 @@ using EMPS.Infrastructure.Data;
 using EMPS.Infrastructure.Repositories;
 using EMPS.Infrastructure.Services;
 using EMPS.Web.Mapping;
+
+// Set QuestPDF community licence once at startup
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 

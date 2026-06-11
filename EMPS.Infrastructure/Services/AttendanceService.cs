@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,6 +54,40 @@ namespace EMPS.Infrastructure.Services
                 _unitOfWork.Attendances.Remove(attendance);
                 await _unitOfWork.SaveChangesAsync(userId);
             }
+        }
+
+        public async Task<IEnumerable<Attendance>> GetByDateAsync(DateTime date)
+        {
+            var results = await _unitOfWork.Attendances.FindWithIncludesAsync(
+                a => a.Date.Date == date.Date,
+                a => a.Employee);
+            return results.OrderBy(a => a.Employee.FirstName);
+        }
+
+        public async Task<IEnumerable<Attendance>> GetMonthlyReportAsync(int month, int year, int? departmentId = null)
+        {
+            var results = await _unitOfWork.Attendances.FindWithIncludesAsync(
+                a => a.Date.Month == month && a.Date.Year == year,
+                a => a.Employee);
+
+            if (departmentId.HasValue)
+                results = results.Where(a => a.Employee.DepartmentId == departmentId.Value);
+
+            return results.OrderBy(a => a.Employee.FirstName).ThenBy(a => a.Date);
+        }
+
+        public async Task<IEnumerable<Attendance>> GetEmployeeHistoryAsync(int employeeId, DateTime? from = null, DateTime? to = null)
+        {
+            var results = await _unitOfWork.Attendances.FindWithIncludesAsync(
+                a => a.EmployeeId == employeeId,
+                a => a.Employee);
+
+            if (from.HasValue)
+                results = results.Where(a => a.Date.Date >= from.Value.Date);
+            if (to.HasValue)
+                results = results.Where(a => a.Date.Date <= to.Value.Date);
+
+            return results.OrderByDescending(a => a.Date);
         }
     }
 }

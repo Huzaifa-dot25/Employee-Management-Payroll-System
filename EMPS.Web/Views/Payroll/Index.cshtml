@@ -88,6 +88,14 @@
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="action-btn action-btn-edit" title="Edit">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
+                                @if (item.HasPayslip)
+                                {
+                                    <a asp-action="DownloadPayslip" asp-route-payrollId="@item.Id"
+                                       class="action-btn action-btn-view" title="Download Payslip PDF"
+                                       target="_blank">
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                    </a>
+                                }
                             </div>
                         </td>
                     </tr>

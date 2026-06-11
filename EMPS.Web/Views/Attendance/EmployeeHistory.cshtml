@@ -1,0 +1,265 @@
+@model EMPS.Web.Models.EmployeeHistoryViewModel
+@{
+    ViewData["Title"] = "Employee Attendance History";
+    bool hasEmployee = Model.EmployeeId > 0;
+}
+
+<div class="module-header">
+    <div class="module-header-left">
+        <div class="module-icon-wrap" style="background:linear-gradient(135deg,#059669,#34d399);">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <div>
+            <h3 class="module-title">Employee Attendance History</h3>
+            <p class="module-sub">Full attendance history with date-range filtering</p>
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-4" style="border-bottom:2px solid #e5e7eb;">
+    <li class="nav-item">
+        <a class="nav-link" asp-action="Index">
+            <i class="fa-solid fa-list me-1"></i>Attendance Log
+        </a>
+    </li>
+    @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-action="Daily">
+                <i class="fa-solid fa-calendar-day me-1"></i>Daily
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-action="MonthlyReport">
+                <i class="fa-solid fa-chart-bar me-1"></i>Monthly Report
+            </a>
+        </li>
+    }
+    <li class="nav-item">
+        <a class="nav-link active fw-semibold" asp-action="EmployeeHistory">
+            <i class="fa-solid fa-clock-rotate-left me-1"></i>Employee History
+        </a>
+    </li>
+</ul>
+
+<div class="data-table-card mb-4 p-3">
+    <form method="get" asp-action="EmployeeHistory" class="row g-3 align-items-end">
+        @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+        {
+            <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Employee</label>
+                <select name="employeeId" class="form-select">
+                    <option value="">— Select Employee —</option>
+                    @foreach (SelectListItem emp in ViewBag.Employees)
+                    {
+                        if (emp.Selected)
+                        { <option value="@emp.Value" selected>@emp.Text</option> }
+                        else
+                        { <option value="@emp.Value">@emp.Text</option> }
+                    }
+                </select>
+            </div>
+        }
+        <div class="col-12 col-md-2">
+            <label class="form-label fw-semibold">From</label>
+            <input type="date" name="from" class="form-control"
+                   value="@(Model.From?.ToString("yyyy-MM-dd") ?? "")" />
+        </div>
+        <div class="col-12 col-md-2">
+            <label class="form-label fw-semibold">To</label>
+            <input type="date" name="to" class="form-control"
+                   value="@(Model.To?.ToString("yyyy-MM-dd") ?? "")" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="fa-solid fa-magnifying-glass me-2"></i>Search
+            </button>
+        </div>
+        @if (hasEmployee)
+        {
+            <div class="col-auto">
+                <a asp-action="EmployeeHistory" asp-route-employeeId="@Model.EmployeeId"
+                   class="btn btn-outline-secondary px-3">
+                    <i class="fa-solid fa-xmark me-1"></i>Clear Filter
+                </a>
+            </div>
+        }
+    </form>
+</div>
+
+@if (hasEmployee)
+{
+    <div class="data-table-card mb-4 p-4">
+        <div class="row g-3">
+            <div class="col-12 col-md-3">
+                <div class="text-muted" style="font-size:.8rem;">Employee Name</div>
+                <div class="fw-bold">@Model.EmployeeName</div>
+            </div>
+            <div class="col-12 col-md-2">
+                <div class="text-muted" style="font-size:.8rem;">Employee Code</div>
+                <div class="fw-bold">@Model.EmployeeCode</div>
+            </div>
+            <div class="col-12 col-md-3">
+                <div class="text-muted" style="font-size:.8rem;">Department</div>
+                <div class="fw-bold">@Model.Department</div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="text-muted" style="font-size:.8rem;">Designation</div>
+                <div class="fw-bold">@Model.Designation</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="module-stats-strip mb-4">
+        <div class="mss-item">
+            <span class="mss-value">@Model.TotalCount</span>
+            <span class="mss-label">Total Days</span>
+        </div>
+        <div class="mss-divider"></div>
+        <div class="mss-item">
+            <span class="mss-value text-success">@Model.PresentCount</span>
+            <span class="mss-label">Present</span>
+        </div>
+        <div class="mss-divider"></div>
+        <div class="mss-item">
+            <span class="mss-value text-danger">@Model.AbsentCount</span>
+            <span class="mss-label">Absent</span>
+        </div>
+        <div class="mss-divider"></div>
+        <div class="mss-item">
+            <span class="mss-value text-warning">@Model.LeaveCount</span>
+            <span class="mss-label">Leave</span>
+        </div>
+        <div class="mss-divider"></div>
+        <div class="mss-item">
+            <span class="mss-value" style="color:#f97316;">@Model.LateCount</span>
+            <span class="mss-label">Late</span>
+        </div>
+        <div class="mss-divider"></div>
+        <div class="mss-item">
+            @{
+                string rateClass = Model.AttendanceRate >= 90 ? "text-success"
+                                 : Model.AttendanceRate >= 70 ? "text-warning"
+                                 : "text-danger";
+            }
+            <span class="mss-value @rateClass">@Model.AttendanceRate%</span>
+            <span class="mss-label">Attendance Rate</span>
+        </div>
+    </div>
+
+    @if (!Model.Records.Any())
+    {
+        <div class="alert alert-info">
+            <i class="fa-solid fa-circle-info me-2"></i>
+            No attendance records found for the selected period.
+        </div>
+    }
+    else
+    {
+        <div class="data-table-card">
+            <div class="table-responsive">
+                <table class="table module-table w-100" id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Status</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Hours Worked</th>
+                            <th>Remarks</th>
+                            @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                            {
+                                <th class="text-end">Actions</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Records)
+                        {
+                            double? hours = null;
+                            if (item.CheckInTime.HasValue && item.CheckOutTime.HasValue)
+                                hours = (item.CheckOutTime.Value - item.CheckInTime.Value).TotalHours;
+
+                            <tr>
+                                <td><span class="date-text">@item.Date.ToString("MMM dd, yyyy")</span></td>
+                                <td><span class="text-sub text-muted">@item.Date.ToString("ddd")</span></td>
+                                <td>
+                                    @if (item.Status == "Present")
+                                    { <span class="status-badge status-active">Present</span> }
+                                    else if (item.Status == "Absent")
+                                    { <span class="status-badge status-terminated">Absent</span> }
+                                    else if (item.Status == "Leave")
+                                    { <span class="status-badge status-pending">Leave</span> }
+                                    else if (item.Status == "HalfDay")
+                                    { <span class="status-badge" style="background:#ede9fe;color:#7c3aed;">Half Day</span> }
+                                    else
+                                    { <span class="status-badge status-inactive">@item.Status</span> }
+                                </td>
+                                <td>
+                                    @if (item.CheckInTime.HasValue)
+                                    { <span class="time-chip time-in"><i class="fa-regular fa-clock"></i> @item.CheckInTime.Value.ToString(@"hh\:mm")</span> }
+                                    else { <span class="text-muted">—</span> }
+                                </td>
+                                <td>
+                                    @if (item.CheckOutTime.HasValue)
+                                    { <span class="time-chip time-out"><i class="fa-regular fa-clock"></i> @item.CheckOutTime.Value.ToString(@"hh\:mm")</span> }
+                                    else { <span class="text-muted">—</span> }
+                                </td>
+                                <td>
+                                    @if (hours.HasValue)
+                                    {
+                                        string hClass = hours.Value >= 8 ? "text-success"
+                                                       : hours.Value >= 4 ? "text-warning" : "text-danger";
+                                        <span class="fw-semibold @hClass">@hours.Value.ToString("F1")h</span>
+                                    }
+                                    else { <span class="text-muted">—</span> }
+                                </td>
+                                <td><span class="text-muted" style="font-size:.8rem;">@(string.IsNullOrEmpty(item.Remarks) ? "—" : item.Remarks)</span></td>
+                                @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                                {
+                                    <td class="text-end">
+                                        <div class="action-btns">
+                                            <a asp-action="Edit" asp-route-id="@item.Id"
+                                               class="action-btn action-btn-edit" title="Edit">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="alert alert-secondary">
+        <i class="fa-solid fa-arrow-up me-2"></i>
+        Select an employee above to view their attendance history.
+    </div>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#historyTable').DataTable({
+                responsive: true,
+                order: [[0, 'desc']],
+                dom: "<'dt-toolbar'<'dt-toolbar-left'l><'dt-toolbar-right'f>>" +
+                     "<'row'<'col-sm-12'tr>>" +
+                     "<'dt-footer'<'dt-footer-left'i><'dt-footer-right'p>>",
+                language: {
+                    search: "",
+                    searchPlaceholder: "🔍  Search records...",
+                    lengthMenu: "Show _MENU_ rows",
+                    info: "Showing _START_–_END_ of _TOTAL_ records",
+                    paginate: { previous: "‹ Prev", next: "Next ›" }
+                }
+            });
+        });
+    </script>
+}
