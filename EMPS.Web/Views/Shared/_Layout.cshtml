@@ -146,6 +146,14 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end mt-2" aria-labelledby="userDropdown">
                                 <li>
+                                    <a asp-controller="Account" asp-action="ChangePassword"
+                                       class="dropdown-item d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-lock" style="color:#4f46e5;"></i>
+                                        <span>Change Password</span>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
                                     <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm">
                                         <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2">
                                             <i class="fa-solid fa-right-from-bracket"></i>

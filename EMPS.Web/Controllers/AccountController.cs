@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using EMPS.Core.Entities;
@@ -51,7 +52,7 @@ namespace EMPS.Web.Controllers
                     }
                     return RedirectToAction("Index", "Home");
                 }
-                
+
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             }
             return View(model);
@@ -69,6 +70,43 @@ namespace EMPS.Web.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        // ── Change Password ───────────────────────────────────────────────────
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View(new ChangePasswordViewModel());
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction("Login");
+
+            var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+
+            if (result.Succeeded)
+            {
+                // Re-sign in so the security stamp is refreshed
+                await _signInManager.RefreshSignInAsync(user);
+                TempData["SuccessMessage"] = "Password changed successfully.";
+                return RedirectToAction("ChangePassword");
+            }
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+            return View(model);
         }
     }
 }
