@@ -43,10 +43,13 @@ namespace EMPS.Web.Mapping
 
             // Payroll Mappings
             CreateMap<Payroll, PayrollViewModel>()
-                .ForMember(dest => dest.EmployeeName,  opt => opt.MapFrom(src => src.Employee != null ? src.Employee.FullName : null))
-                .ForMember(dest => dest.HasPayslip,    opt => opt.MapFrom(src => src.Payslip != null))
-                .ForMember(dest => dest.PayslipId,     opt => opt.MapFrom(src => src.Payslip != null ? (int?)src.Payslip.Id : null))
-                .ForMember(dest => dest.PayslipCode,   opt => opt.MapFrom(src => src.Payslip != null ? src.Payslip.PayslipCode : null))
+                .ForMember(dest => dest.EmployeeName,       opt => opt.MapFrom(src => src.Employee != null ? src.Employee.FullName : null))
+                .ForMember(dest => dest.EmployeeCode,       opt => opt.MapFrom(src => src.Employee != null ? src.Employee.EmployeeCode : null))
+                .ForMember(dest => dest.DepartmentName,     opt => opt.MapFrom(src => src.Employee != null && src.Employee.Department != null ? src.Employee.Department.Name : null))
+                .ForMember(dest => dest.DesignationName,    opt => opt.MapFrom(src => src.Employee != null && src.Employee.Designation != null ? src.Employee.Designation.Name : null))
+                .ForMember(dest => dest.HasPayslip,         opt => opt.MapFrom(src => src.Payslip != null))
+                .ForMember(dest => dest.PayslipId,          opt => opt.MapFrom(src => src.Payslip != null ? (int?)src.Payslip.Id : null))
+                .ForMember(dest => dest.PayslipCode,        opt => opt.MapFrom(src => src.Payslip != null ? src.Payslip.PayslipCode : null))
                 .ReverseMap()
                 .ForMember(dest => dest.Employee, opt => opt.Ignore())
                 .ForMember(dest => dest.Payslip,  opt => opt.Ignore());

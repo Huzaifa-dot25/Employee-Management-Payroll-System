@@ -1,54 +1,68 @@
 @model EMPS.Web.Models.PayrollViewModel
 @{
-    ViewData["Title"] = "Process Payroll";
+    ViewData["Title"] = "Generate Salary";
 }
 
 <div class="form-page-header mb-4">
-    <div class="form-page-icon"><i class="fa-solid fa-receipt"></i></div>
+    <div class="form-page-icon" style="background:linear-gradient(135deg,#059669,#34d399);">
+        <i class="fa-solid fa-calculator"></i>
+    </div>
     <div>
-        <h4 class="form-page-title">Process New Payroll</h4>
-        <p class="form-page-sub">Create a payroll record for an employee for a specific period.</p>
+        <h4 class="form-page-title">Generate Salary</h4>
+        <p class="form-page-sub">Select an employee to auto-fill salary, then adjust and save.</p>
     </div>
     <a asp-action="Index" class="btn btn-outline-secondary btn-sm ms-auto">
         <i class="fa-solid fa-arrow-left me-1"></i>Back
     </a>
 </div>
 
-<form asp-action="Create" method="post">
-    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-4"></div>
+<form asp-action="Create" method="post" id="payrollForm">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 mb-4" style="display:none;"></div>
 
-    <div class="row g-4 mb-4">
-        <!-- Employee & Period -->
-        <div class="col-12 col-lg-5">
-            <div class="form-card h-100">
+    <div class="row g-4">
+
+        @* ── Left: Employee / Period / Status ── *@
+        <div class="col-12 col-lg-4">
+            <div class="form-card mb-4">
                 <div class="form-card-section-title">
                     <i class="fa-solid fa-user-tie"></i> Employee & Period
                 </div>
+
                 <div class="mb-3">
                     <label asp-for="EmployeeId" class="form-label form-label-custom">Employee</label>
-                    <select asp-for="EmployeeId" class="form-select form-control-custom" asp-items="ViewBag.Employees">
+                    <select asp-for="EmployeeId" id="employeeSelect"
+                            class="form-select form-control-custom" asp-items="ViewBag.Employees">
                         <option value="">— Select Employee —</option>
                     </select>
                     <span asp-validation-for="EmployeeId" class="field-error"></span>
                 </div>
-                <div class="row g-3">
+
+                <div class="row g-2 mb-3">
                     <div class="col-7">
                         <label asp-for="Month" class="form-label form-label-custom">Month</label>
-                        <select asp-for="Month" class="form-select form-control-custom">
-                            @for (int i = 1; i <= 12; i++)
-                            {
+                        <select asp-for="Month" id="monthSelect" class="form-select form-control-custom">
+                            @for (int i = 1; i <= 12; i++) {
                                 <option value="@i">@(new DateTime(2000, i, 1).ToString("MMMM"))</option>
                             }
                         </select>
-                        <span asp-validation-for="Month" class="field-error"></span>
                     </div>
                     <div class="col-5">
                         <label asp-for="Year" class="form-label form-label-custom">Year</label>
-                        <input asp-for="Year" class="form-control form-control-custom" type="number" placeholder="2025" />
-                        <span asp-validation-for="Year" class="field-error"></span>
+                        <input asp-for="Year" id="yearInput" type="number"
+                               class="form-control form-control-custom" />
                     </div>
                 </div>
-                <div class="mt-3">
+
+                <button type="button" id="btnGenerate"
+                        class="btn btn-primary w-100 mb-3" disabled>
+                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i>Auto-Generate Salary
+                </button>
+                <div id="generateMsg" class="text-muted" style="font-size:.78rem;"></div>
+
+                <hr class="my-3">
+
+                <div class="mb-3">
                     <label asp-for="Status" class="form-label form-label-custom">Payroll Status</label>
                     <select asp-for="Status" class="form-select form-control-custom">
                         <option value="Draft">📝 Draft</option>
@@ -56,81 +70,270 @@
                         <option value="Paid">💰 Paid</option>
                     </select>
                 </div>
+                <div class="mb-3">
+                    <label asp-for="PaymentMethod" class="form-label form-label-custom">Payment Method</label>
+                    <select asp-for="PaymentMethod" class="form-select form-control-custom">
+                        <option value="">— Optional —</option>
+                        <option>Bank Transfer</option>
+                        <option>Cash</option>
+                        <option>Cheque</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="PaymentDate" class="form-label form-label-custom">Payment Date</label>
+                    <input asp-for="PaymentDate" type="date" class="form-control form-control-custom" />
+                </div>
+                <div>
+                    <label asp-for="Notes" class="form-label form-label-custom">Notes</label>
+                    <textarea asp-for="Notes" class="form-control form-control-custom" rows="2"
+                              placeholder="Optional notes..."></textarea>
+                </div>
             </div>
         </div>
 
-        <!-- Earnings -->
-        <div class="col-12 col-lg-7">
+        @* ── Middle: Earnings + Deductions ── *@
+        <div class="col-12 col-lg-5">
+
+            @* Earnings *@
             <div class="form-card mb-4">
                 <div class="form-card-section-title text-success">
                     <i class="fa-solid fa-arrow-trend-up"></i> Earnings
                 </div>
                 <div class="row g-3">
                     <div class="col-12 col-sm-6">
-                        <label asp-for="BasicSalary" class="form-label form-label-custom">Basic Salary</label>
+                        <label asp-for="BasicSalary" class="form-label form-label-custom"></label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
-                            <input asp-for="BasicSalary" class="form-control form-control-custom" type="number" step="0.01" placeholder="0.00" />
+                            <input asp-for="BasicSalary" id="basicSalary" type="number" step="0.01"
+                                   class="form-control form-control-custom calc-input" placeholder="0.00" />
                         </div>
                         <span asp-validation-for="BasicSalary" class="field-error"></span>
                     </div>
                     <div class="col-12 col-sm-6">
-                        <label asp-for="Allowances" class="form-label form-label-custom">Allowances</label>
+                        <label asp-for="Allowances" class="form-label form-label-custom"></label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
-                            <input asp-for="Allowances" class="form-control form-control-custom" type="number" step="0.01" placeholder="0.00" />
+                            <input asp-for="Allowances" id="allowances" type="number" step="0.01"
+                                   class="form-control form-control-custom calc-input" placeholder="0.00" />
                         </div>
                     </div>
                     <div class="col-12 col-sm-6">
-                        <label asp-for="Bonuses" class="form-label form-label-custom">Bonuses</label>
+                        <label asp-for="Bonuses" class="form-label form-label-custom"></label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
-                            <input asp-for="Bonuses" class="form-control form-control-custom" type="number" step="0.01" placeholder="0.00" />
+                            <input asp-for="Bonuses" id="bonuses" type="number" step="0.01"
+                                   class="form-control form-control-custom calc-input" placeholder="0.00" />
                         </div>
                     </div>
+                </div>
+
+                <hr class="my-3">
+                <div class="form-card-section-title" style="color:#f97316;">
+                    <i class="fa-solid fa-clock"></i> Overtime
+                </div>
+                <div class="row g-3">
                     <div class="col-12 col-sm-6">
-                        <label asp-for="OvertimePay" class="form-label form-label-custom">Overtime Pay</label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input asp-for="OvertimePay" class="form-control form-control-custom" type="number" step="0.01" placeholder="0.00" />
+                        <label asp-for="OvertimeHours" class="form-label form-label-custom">Hours</label>
+                        <input asp-for="OvertimeHours" id="overtimeHours" type="number" step="0.5"
+                               class="form-control form-control-custom calc-input" placeholder="0" />
+                    </div>
+                    <div class="col-12 col-sm-6">
+                        <label asp-for="OvertimeRatePerHour" class="form-label form-label-custom">Rate / Hour ($)</label>
+                        <input asp-for="OvertimeRatePerHour" id="overtimeRate" type="number" step="0.01"
+                               class="form-control form-control-custom calc-input" placeholder="0.00" />
+                    </div>
+                    <div class="col-12">
+                        <div class="p-2 rounded text-end" style="background:#fff7ed;font-size:.82rem;">
+                            Overtime Pay:
+                            <strong class="text-warning ms-2" id="overtimePayDisplay">$0.00</strong>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Deductions -->
+            @* Deductions *@
             <div class="form-card">
                 <div class="form-card-section-title text-danger">
                     <i class="fa-solid fa-arrow-trend-down"></i> Deductions
                 </div>
                 <div class="row g-3">
                     <div class="col-12 col-sm-6">
-                        <label asp-for="TaxDeductions" class="form-label form-label-custom">Tax Deductions</label>
+                        <label asp-for="TaxRate" class="form-label form-label-custom">Tax Rate (%)</label>
                         <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input asp-for="TaxDeductions" class="form-control form-control-custom" type="number" step="0.01" placeholder="0.00" />
+                            <input asp-for="TaxRate" id="taxRate" type="number" step="0.1" min="0" max="100"
+                                   class="form-control form-control-custom calc-input" placeholder="15" />
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div class="mt-1" style="font-size:.78rem;color:#6b7280;">
+                            Tax Amount: <strong id="taxAmountDisplay" class="text-danger">$0.00</strong>
                         </div>
                     </div>
                     <div class="col-12 col-sm-6">
-                        <label asp-for="OtherDeductions" class="form-label form-label-custom">Other Deductions</label>
+                        <label asp-for="OtherDeductions" class="form-label form-label-custom"></label>
                         <div class="input-group">
                             <span class="input-group-text">$</span>
-                            <input asp-for="OtherDeductions" class="form-control form-control-custom" type="number" step="0.01" placeholder="0.00" />
+                            <input asp-for="OtherDeductions" id="otherDeductions" type="number" step="0.01"
+                                   class="form-control form-control-custom calc-input" placeholder="0.00" />
                         </div>
+                        <div class="mt-1" style="font-size:.78rem;color:#6b7280;">PF, insurance, etc.</div>
                     </div>
                 </div>
             </div>
         </div>
+
+        @* ── Right: Live Summary ── *@
+        <div class="col-12 col-lg-3">
+            <div class="form-card" style="position:sticky;top:80px;">
+                <div class="form-card-section-title">
+                    <i class="fa-solid fa-calculator"></i> Salary Summary
+                </div>
+
+                <div class="salary-summary-line">
+                    <span>Basic Salary</span>
+                    <span id="s_basic">$0.00</span>
+                </div>
+                <div class="salary-summary-line">
+                    <span>Allowances</span>
+                    <span id="s_allow" class="text-success">$0.00</span>
+                </div>
+                <div class="salary-summary-line">
+                    <span>Bonuses</span>
+                    <span id="s_bonus" class="text-success">$0.00</span>
+                </div>
+                <div class="salary-summary-line">
+                    <span>Overtime Pay</span>
+                    <span id="s_ot" class="text-warning">$0.00</span>
+                </div>
+                <div class="salary-summary-divider"></div>
+                <div class="salary-summary-line salary-summary-gross">
+                    <span>Gross Salary</span>
+                    <span id="s_gross">$0.00</span>
+                </div>
+                <div class="salary-summary-divider"></div>
+                <div class="salary-summary-line">
+                    <span>Tax Deduction</span>
+                    <span id="s_tax" class="text-danger">$0.00</span>
+                </div>
+                <div class="salary-summary-line">
+                    <span>Other Deductions</span>
+                    <span id="s_other" class="text-danger">$0.00</span>
+                </div>
+                <div class="salary-summary-divider"></div>
+                <div class="salary-summary-net">
+                    <span>Net Salary</span>
+                    <span id="s_net">$0.00</span>
+                </div>
+
+                @* Formula hint *@
+                <div class="mt-3 p-2 rounded" style="background:#f0fdf4;font-size:.72rem;color:#065f46;line-height:1.6;">
+                    <strong>Formula:</strong><br>
+                    Net = Basic + Allowances + Bonuses + Overtime − Tax − Other Deductions
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="form-actions-bar">
+    <div class="form-actions-bar mt-4">
         <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
         <button type="submit" class="btn btn-primary px-5">
-            <i class="fa-solid fa-floppy-disk me-2"></i>Process Payroll
+            <i class="fa-solid fa-floppy-disk me-2"></i>Save Payroll
         </button>
     </div>
 </form>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const fmt = v => '$' + parseFloat(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        function recalc() {
+            const basic  = parseFloat(document.getElementById('basicSalary').value)    || 0;
+            const allow  = parseFloat(document.getElementById('allowances').value)      || 0;
+            const bonus  = parseFloat(document.getElementById('bonuses').value)         || 0;
+            const otHrs  = parseFloat(document.getElementById('overtimeHours').value)  || 0;
+            const otRate = parseFloat(document.getElementById('overtimeRate').value)    || 0;
+            const taxPct = parseFloat(document.getElementById('taxRate').value)         || 0;
+            const other  = parseFloat(document.getElementById('otherDeductions').value) || 0;
+
+            const otPay  = Math.round(otHrs * otRate * 100) / 100;
+            const gross  = basic + allow + bonus + otPay;
+            const taxAmt = Math.round(gross * taxPct / 100 * 100) / 100;
+            const net    = gross - taxAmt - other;
+
+            document.getElementById('overtimePayDisplay').textContent = fmt(otPay);
+            document.getElementById('taxAmountDisplay').textContent   = fmt(taxAmt);
+
+            document.getElementById('s_basic').textContent  = fmt(basic);
+            document.getElementById('s_allow').textContent  = fmt(allow);
+            document.getElementById('s_bonus').textContent  = fmt(bonus);
+            document.getElementById('s_ot').textContent     = fmt(otPay);
+            document.getElementById('s_gross').textContent  = fmt(gross);
+            document.getElementById('s_tax').textContent    = fmt(taxAmt);
+            document.getElementById('s_other').textContent  = fmt(other);
+            document.getElementById('s_net').textContent    = fmt(Math.max(net, 0));
+        }
+
+        // Wire all calc inputs
+        document.querySelectorAll('.calc-input').forEach(el => el.addEventListener('input', recalc));
+        recalc();
+
+        // Enable generate button when employee is selected
+        document.getElementById('employeeSelect').addEventListener('change', function () {
+            document.getElementById('btnGenerate').disabled = !this.value;
+        });
+
+        // Auto-generate from server
+        document.getElementById('btnGenerate').addEventListener('click', function () {
+            const empId = document.getElementById('employeeSelect').value;
+            const month = document.getElementById('monthSelect').value;
+            const year  = document.getElementById('yearInput').value;
+            if (!empId) return;
+
+            document.getElementById('generateMsg').textContent = 'Generating…';
+            fetch(`/Payroll/GenerateSalary?employeeId=${empId}&month=${month}&year=${year}`)
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById('basicSalary').value      = d.basicSalary;
+                    document.getElementById('allowances').value        = d.allowances;
+                    document.getElementById('bonuses').value           = d.bonuses;
+                    document.getElementById('overtimeHours').value     = d.overtimeHours;
+                    document.getElementById('overtimeRate').value      = d.overtimeRatePerHour;
+                    document.getElementById('taxRate').value           = d.taxRate;
+                    document.getElementById('otherDeductions').value   = d.otherDeductions;
+                    document.getElementById('generateMsg').textContent = '✅ Salary auto-filled from employee record.';
+                    recalc();
+                })
+                .catch(() => {
+                    document.getElementById('generateMsg').textContent = '❌ Could not auto-generate.';
+                });
+        });
+    </script>
+
+    <style>
+        .salary-summary-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: .82rem;
+            padding: 5px 0;
+            color: #374151;
+        }
+        .salary-summary-gross {
+            font-weight: 700;
+            font-size: .88rem;
+            color: #111827;
+        }
+        .salary-summary-divider {
+            border-top: 1px dashed #e5e7eb;
+            margin: 6px 0;
+        }
+        .salary-summary-net {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #4f46e5;
+            padding: 8px 0 2px;
+        }
+    </style>
 }

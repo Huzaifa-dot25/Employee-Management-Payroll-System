@@ -20,13 +20,13 @@ namespace EMPS.Web.Controllers
     [Authorize]
     public class PayrollController : Controller
     {
-        private readonly IPayrollService _payrollService;
+        private readonly IPayrollService  _payrollService;
         private readonly IEmployeeService _employeeService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
 
         public PayrollController(
-            IPayrollService payrollService,
+            IPayrollService  payrollService,
             IEmployeeService employeeService,
             UserManager<ApplicationUser> userManager,
             IMapper mapper)
@@ -37,20 +37,41 @@ namespace EMPS.Web.Controllers
             _mapper          = mapper;
         }
 
+        // ── Index ─────────────────────────────────────────────────────────────
+
         [Authorize(Roles = "Admin,HR")]
         public async Task<IActionResult> Index()
         {
             var payrolls = await _payrollService.GetAllPayrollsAsync();
-            var model = _mapper.Map<IEnumerable<PayrollViewModel>>(payrolls);
+            var model    = _mapper.Map<IEnumerable<PayrollViewModel>>(payrolls);
             return View(model);
         }
+
+        // ── Details ───────────────────────────────────────────────────────────
+
+        [Authorize(Roles = "Admin,HR")]
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var payroll = await _payrollService.GetPayrollByIdAsync(id);
+            if (payroll == null) return NotFound();
+            var model = _mapper.Map<PayrollViewModel>(payroll);
+            return View(model);
+        }
+
+        // ── Create ────────────────────────────────────────────────────────────
 
         [Authorize(Roles = "Admin,HR")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
             await PopulateEmployeesDropdownAsync();
-            return View(new PayrollViewModel { Month = DateTime.Today.Month, Year = DateTime.Today.Year });
+            return View(new PayrollViewModel
+            {
+                Month   = DateTime.Today.Month,
+                Year    = DateTime.Today.Year,
+                TaxRate = 15
+            });
         }
 
         [Authorize(Roles = "Admin,HR")]
@@ -61,7 +82,7 @@ namespace EMPS.Web.Controllers
             if (ModelState.IsValid)
             {
                 var payroll = _mapper.Map<Payroll>(model);
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "System";
+                var userId  = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "System";
                 await _payrollService.CreatePayrollAsync(payroll, userId);
                 TempData["SuccessMessage"] = "Payroll record created successfully.";
                 return RedirectToAction(nameof(Index));
@@ -69,6 +90,8 @@ namespace EMPS.Web.Controllers
             await PopulateEmployeesDropdownAsync(model.EmployeeId);
             return View(model);
         }
+
+        // ── Edit ──────────────────────────────────────────────────────────────
 
         [Authorize(Roles = "Admin,HR")]
         [HttpGet]
@@ -97,19 +120,55 @@ namespace EMPS.Web.Controllers
                 _mapper.Map(model, payroll);
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "System";
                 await _payrollService.UpdatePayrollAsync(payroll, userId);
-                
-                // If paid, generate payslip
+
                 if (model.Status == "Paid" && payroll.Payslip == null)
-                {
                     await _payrollService.GeneratePayslipAsync(payroll.Id, userId);
-                }
-                
+
                 TempData["SuccessMessage"] = "Payroll updated successfully.";
                 return RedirectToAction(nameof(Index));
             }
             await PopulateEmployeesDropdownAsync(model.EmployeeId);
             return View(model);
         }
+
+        // ── Generate Salary (AJAX) ────────────────────────────────────────────
+
+        /// <summary>
+        /// Returns a pre-filled payroll JSON object based on the employee's
+        /// basic salary and default rates. Used by the Create form's "Generate" button.
+        /// </summary>
+        [Authorize(Roles = "Admin,HR")]
+        [HttpGet]
+        public async Task<IActionResult> GenerateSalary(int employeeId, int month, int year)
+        {
+            if (employeeId <= 0)
+                return BadRequest("Invalid employee.");
+
+            try
+            {
+                var payroll = await _payrollService.GenerateSalaryAsync(employeeId, month, year);
+                return Json(new
+                {
+                    basicSalary         = payroll.BasicSalary,
+                    allowances          = payroll.Allowances,
+                    bonuses             = payroll.Bonuses,
+                    overtimeHours       = payroll.OvertimeHours,
+                    overtimeRatePerHour = payroll.OvertimeRatePerHour,
+                    taxRate             = payroll.TaxRate,
+                    otherDeductions     = payroll.OtherDeductions,
+                    overtimePay         = payroll.OvertimePay,
+                    grossSalary         = payroll.GrossSalary,
+                    taxDeductions       = payroll.TaxDeductions,
+                    netSalary           = payroll.NetSalary
+                });
+            }
+            catch
+            {
+                return BadRequest("Could not generate salary.");
+            }
+        }
+
+        // ── My Payslips ───────────────────────────────────────────────────────
 
         public async Task<IActionResult> MyPayslips()
         {
@@ -118,7 +177,6 @@ namespace EMPS.Web.Controllers
             if (employeeId.HasValue)
             {
                 var payrolls = await _payrollService.GetPayrollsByEmployeeIdAsync(employeeId.Value);
-                // Only show Approved or Paid payslips to employees
                 payrolls = payrolls.Where(p => p.Status != "Draft").ToList();
                 var model = _mapper.Map<IEnumerable<PayrollViewModel>>(payrolls);
                 return View(model);
@@ -127,7 +185,7 @@ namespace EMPS.Web.Controllers
             return View(new List<PayrollViewModel>());
         }
 
-        // ── Download PDF ─────────────────────────────────────────────────────
+        // ── Download PDF ──────────────────────────────────────────────────────
 
         [HttpGet]
         public async Task<IActionResult> DownloadPayslip(int payrollId)
@@ -135,7 +193,6 @@ namespace EMPS.Web.Controllers
             var payroll = await _payrollService.GetPayrollByIdAsync(payrollId);
             if (payroll == null) return NotFound();
 
-            // Employees can only download their own payslip
             if (User.IsInRole("Employee"))
             {
                 var empId = await GetCurrentEmployeeIdAsync();
@@ -146,23 +203,20 @@ namespace EMPS.Web.Controllers
             if (payroll.Status != "Paid" || payroll.Payslip == null)
                 return BadRequest("Payslip is only available for Paid payrolls.");
 
-            // Set QuestPDF community licence (free, no watermark for OSS/community use)
             QuestPDF.Settings.License = LicenseType.Community;
-
-            var document  = new PayslipDocument(payroll);
-            var pdfBytes  = document.GeneratePdf();
-            var fileName  = $"Payslip-{payroll.Payslip.PayslipCode}.pdf";
+            var document = new PayslipDocument(payroll);
+            var pdfBytes = document.GeneratePdf();
+            var fileName = $"Payslip-{payroll.Payslip.PayslipCode}.pdf";
 
             return File(pdfBytes, "application/pdf", fileName);
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
+        // ── Helpers ───────────────────────────────────────────────────────────
 
         private async Task<int?> GetCurrentEmployeeIdAsync()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return null;
-
             var appUser = await _userManager.FindByIdAsync(userId);
             return appUser?.EmployeeId;
         }

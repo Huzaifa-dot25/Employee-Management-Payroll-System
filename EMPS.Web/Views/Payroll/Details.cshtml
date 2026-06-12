@@ -1,0 +1,163 @@
+@model EMPS.Web.Models.PayrollViewModel
+@{
+    ViewData["Title"] = "Payroll Details";
+    var period = new DateTime(Model.Year, Model.Month, 1).ToString("MMMM yyyy");
+}
+
+<div class="form-page-header mb-4">
+    <div class="form-page-icon" style="background:linear-gradient(135deg,#4f46e5,#818cf8);">
+        <i class="fa-solid fa-file-invoice-dollar"></i>
+    </div>
+    <div>
+        <h4 class="form-page-title">Payroll Details</h4>
+        <p class="form-page-sub">@Model.EmployeeName &mdash; @period</p>
+    </div>
+    <div class="ms-auto d-flex gap-2">
+        @if (Model.HasPayslip)
+        {
+            <a asp-action="DownloadPayslip" asp-route-payrollId="@Model.Id"
+               class="btn btn-success btn-sm" target="_blank">
+                <i class="fa-solid fa-file-pdf me-1"></i>Download PDF
+            </a>
+        }
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">
+            <i class="fa-solid fa-pen-to-square me-1"></i>Edit
+        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="fa-solid fa-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    @* Employee Info *@
+    <div class="col-12 col-md-4">
+        <div class="form-card h-100">
+            <div class="form-card-section-title"><i class="fa-solid fa-user-tie"></i> Employee</div>
+            <div class="mb-2">
+                <div class="text-muted" style="font-size:.75rem;">Name</div>
+                <div class="fw-bold">@Model.EmployeeName</div>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.EmployeeCode))
+            {
+                <div class="mb-2">
+                    <div class="text-muted" style="font-size:.75rem;">Code</div>
+                    <div class="fw-semibold">@Model.EmployeeCode</div>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.DepartmentName))
+            {
+                <div class="mb-2">
+                    <div class="text-muted" style="font-size:.75rem;">Department</div>
+                    <div>@Model.DepartmentName</div>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.DesignationName))
+            {
+                <div class="mb-2">
+                    <div class="text-muted" style="font-size:.75rem;">Designation</div>
+                    <div>@Model.DesignationName</div>
+                </div>
+            }
+            <hr>
+            <div class="mb-2">
+                <div class="text-muted" style="font-size:.75rem;">Pay Period</div>
+                <div class="fw-bold">@period</div>
+            </div>
+            <div class="mb-2">
+                <div class="text-muted" style="font-size:.75rem;">Status</div>
+                @if (Model.Status == "Paid")
+                { <span class="status-badge status-active">Paid</span> }
+                else if (Model.Status == "Approved")
+                { <span class="status-badge status-approved">Approved</span> }
+                else
+                { <span class="status-badge status-inactive">Draft</span> }
+            </div>
+            @if (Model.PaymentDate.HasValue)
+            {
+                <div class="mb-2">
+                    <div class="text-muted" style="font-size:.75rem;">Payment Date</div>
+                    <div>@Model.PaymentDate.Value.ToString("dd MMM yyyy")</div>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.PaymentMethod))
+            {
+                <div class="mb-2">
+                    <div class="text-muted" style="font-size:.75rem;">Payment Method</div>
+                    <div>@Model.PaymentMethod</div>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                <div>
+                    <div class="text-muted" style="font-size:.75rem;">Notes</div>
+                    <div class="text-muted" style="font-size:.85rem;">@Model.Notes</div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Earnings & Deductions breakdown *@
+    <div class="col-12 col-md-5">
+        <div class="form-card mb-4">
+            <div class="form-card-section-title text-success">
+                <i class="fa-solid fa-arrow-trend-up"></i> Earnings
+            </div>
+            <table class="table table-sm mb-0">
+                <tbody>
+                    <tr><td class="text-muted">Basic Salary</td><td class="text-end fw-semibold">@Model.BasicSalary.ToString("C")</td></tr>
+                    <tr><td class="text-muted">Allowances</td><td class="text-end text-success">@Model.Allowances.ToString("C")</td></tr>
+                    <tr><td class="text-muted">Bonuses</td><td class="text-end text-success">@Model.Bonuses.ToString("C")</td></tr>
+                    <tr>
+                        <td class="text-muted">
+                            Overtime
+                            <small class="text-muted">(@Model.OvertimeHours h × @Model.OvertimeRatePerHour.ToString("C"))</small>
+                        </td>
+                        <td class="text-end" style="color:#f97316;">@Model.OvertimePay.ToString("C")</td>
+                    </tr>
+                    <tr class="table-light">
+                        <td class="fw-bold">Gross Salary</td>
+                        <td class="text-end fw-bold fs-6">@Model.GrossSalary.ToString("C")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-card">
+            <div class="form-card-section-title text-danger">
+                <i class="fa-solid fa-arrow-trend-down"></i> Deductions
+            </div>
+            <table class="table table-sm mb-0">
+                <tbody>
+                    <tr>
+                        <td class="text-muted">Tax (@Model.TaxRate%)</td>
+                        <td class="text-end text-danger">-@Model.TaxDeductions.ToString("C")</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Other Deductions</td>
+                        <td class="text-end text-danger">-@Model.OtherDeductions.ToString("C")</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @* Net Salary card *@
+    <div class="col-12 col-md-3">
+        <div class="form-card text-center" style="background:linear-gradient(135deg,#4f46e5,#6366f1);color:#fff;">
+            <div style="font-size:.8rem;opacity:.8;margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px;">Net Salary</div>
+            <div style="font-size:2rem;font-weight:900;">@Model.NetSalary.ToString("C")</div>
+            <div style="font-size:.75rem;opacity:.7;margin-top:6px;">@period</div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.PayslipCode))
+        {
+            <div class="form-card mt-4 text-center">
+                <div class="text-muted" style="font-size:.75rem;">Payslip Code</div>
+                <div class="fw-bold" style="font-size:.9rem;color:#4f46e5;">@Model.PayslipCode</div>
+            </div>
+        }
+    </div>
+
+</div>

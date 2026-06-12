@@ -18,7 +18,7 @@
     </div>
     <a asp-action="Create" class="btn-module-add">
         <i class="fa-solid fa-plus"></i>
-        <span>New Payroll</span>
+        <span>Generate Salary</span>
     </a>
 </div>
 
@@ -85,6 +85,9 @@
                         </td>
                         <td class="text-end">
                             <div class="action-btns">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="action-btn action-btn-view" title="View Details">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="action-btn action-btn-edit" title="Edit">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
@@ -92,7 +95,7 @@
                                 {
                                     <a asp-action="DownloadPayslip" asp-route-payrollId="@item.Id"
                                        class="action-btn action-btn-view" title="Download Payslip PDF"
-                                       target="_blank">
+                                       target="_blank" style="color:#059669;">
                                         <i class="fa-solid fa-file-pdf"></i>
                                     </a>
                                 }

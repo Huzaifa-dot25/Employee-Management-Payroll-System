@@ -13,5 +13,11 @@ namespace EMPS.Core.Interfaces.Services
         Task UpdatePayrollAsync(Payroll payroll, string userId);
         Task DeletePayrollAsync(int id, string userId);
         Task GeneratePayslipAsync(int payrollId, string userId);
+
+        /// <summary>
+        /// Builds a pre-filled Payroll object from the employee's basic salary
+        /// and default rates. Does NOT persist — used for the Generate Salary wizard.
+        /// </summary>
+        Task<Payroll> GenerateSalaryAsync(int employeeId, int month, int year);
     }
 }
