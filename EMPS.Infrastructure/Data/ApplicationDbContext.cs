@@ -118,11 +118,18 @@ namespace EMPS.Infrastructure.Data
                 entity.Property(e => e.BasicSalary).HasPrecision(18, 2);
                 entity.Property(e => e.Allowances).HasPrecision(18, 2);
                 entity.Property(e => e.Bonuses).HasPrecision(18, 2);
-                entity.Property(e => e.OvertimePay).HasPrecision(18, 2);
-                entity.Property(e => e.TaxDeductions).HasPrecision(18, 2);
+                entity.Property(e => e.OvertimeHours).HasPrecision(18, 2);
+                entity.Property(e => e.OvertimeRatePerHour).HasPrecision(18, 2);
+                entity.Property(e => e.TaxRate).HasPrecision(5, 2);
                 entity.Property(e => e.OtherDeductions).HasPrecision(18, 2);
                 entity.Property(e => e.Status).IsRequired().HasMaxLength(20);
                 entity.HasQueryFilter(e => !e.IsDeleted);
+
+                // OvertimePay, GrossSalary, TaxDeductions, NetSalary are computed in C# — not stored
+                entity.Ignore(e => e.OvertimePay);
+                entity.Ignore(e => e.GrossSalary);
+                entity.Ignore(e => e.TaxDeductions);
+                entity.Ignore(e => e.NetSalary);
 
                 entity.HasOne(p => p.Employee)
                     .WithMany(e => e.Payrolls)
