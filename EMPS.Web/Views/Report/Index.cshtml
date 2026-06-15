@@ -1,52 +1,183 @@
 @{
-    ViewData["Title"] = "Reports";
+    ViewData["Title"] = "Reports Dashboard";
+    var currentYear = DateTime.Today.Year;
+    var currentMonth = DateTime.Today.Month;
 }
 
 <div class="form-page-header mb-5">
     <div class="form-page-icon"><i class="fa-solid fa-chart-line"></i></div>
     <div>
         <h4 class="form-page-title">Reports Dashboard</h4>
-        <p class="form-page-sub">Generate and export data reports for your organisation.</p>
+        <p class="form-page-sub">Generate, filter, and export organization data in PDF or CSV formats.</p>
     </div>
 </div>
 
 <div class="row g-4">
+    <!-- Employee Directory Report -->
     <div class="col-12 col-md-4">
-        <div class="report-card">
-            <div class="report-card-icon" style="background:linear-gradient(135deg,#4f46e5,#818cf8);">
-                <i class="fa-solid fa-users"></i>
+        <div class="report-card d-flex flex-column justify-content-between h-100">
+            <div>
+                <div class="report-card-icon mb-3" style="background:linear-gradient(135deg,#4f46e5,#818cf8);">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <h5 class="report-card-title mb-2">Employee Report</h5>
+                <p class="report-card-desc mb-4">Export employee directories filtered by department and status.</p>
+
+                <form asp-controller="Report" asp-action="ExportEmployeeReport" method="get">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Department</label>
+                        <select name="departmentId" class="form-select">
+                            <option value="">All Departments</option>
+                            @if (ViewBag.Departments != null)
+                            {
+                                @foreach (var dept in (SelectList)ViewBag.Departments)
+                                {
+                                    <option value="@dept.Value">@dept.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="All">All Statuses</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Terminated">Terminated</option>
+                            <option value="Resigned">Resigned</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold">Format</label>
+                        <select name="format" class="form-select">
+                            <option value="pdf">PDF Document</option>
+                            <option value="csv">CSV Spreadsheet</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fa-solid fa-file-arrow-down me-2"></i>Generate Report
+                    </button>
+                </form>
             </div>
-            <h5 class="report-card-title">Employee Report</h5>
-            <p class="report-card-desc">Export a full directory of all employees including personal, employment, and salary details.</p>
-            <button class="btn btn-primary w-100">
-                <i class="fa-solid fa-file-arrow-down me-2"></i>Generate Report
-            </button>
         </div>
     </div>
 
+    <!-- Attendance Logs Report -->
     <div class="col-12 col-md-4">
-        <div class="report-card">
-            <div class="report-card-icon" style="background:linear-gradient(135deg,#10b981,#34d399);">
-                <i class="fa-solid fa-calendar-check"></i>
+        <div class="report-card d-flex flex-column justify-content-between h-100">
+            <div>
+                <div class="report-card-icon mb-3" style="background:linear-gradient(135deg,#10b981,#34d399);">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <h5 class="report-card-title mb-2">Attendance Report</h5>
+                <p class="report-card-desc mb-4">Export check-in and check-out logs for a specific date range.</p>
+
+                <form asp-controller="Report" asp-action="ExportAttendanceReport" method="get">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Department</label>
+                        <select name="departmentId" class="form-select">
+                            <option value="">All Departments</option>
+                            @if (ViewBag.Departments != null)
+                            {
+                                @foreach (var dept in (SelectList)ViewBag.Departments)
+                                {
+                                    <option value="@dept.Value">@dept.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-bold">From Date</label>
+                            <input type="date" name="fromDate" class="form-control" value="@DateTime.Today.AddDays(-30).ToString("yyyy-MM-dd")" required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-bold">To Date</label>
+                            <input type="date" name="toDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold">Format</label>
+                        <select name="format" class="form-select">
+                            <option value="pdf">PDF Document</option>
+                            <option value="csv">CSV Spreadsheet</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 text-white">
+                        <i class="fa-solid fa-file-arrow-down me-2"></i>Generate Report
+                    </button>
+                </form>
             </div>
-            <h5 class="report-card-title">Attendance Report</h5>
-            <p class="report-card-desc">Export monthly or custom-range attendance logs with check-in / check-out records.</p>
-            <button class="btn btn-success w-100">
-                <i class="fa-solid fa-file-arrow-down me-2"></i>Generate Report
-            </button>
         </div>
     </div>
 
+    <!-- Payroll Summary Report -->
     <div class="col-12 col-md-4">
-        <div class="report-card">
-            <div class="report-card-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">
-                <i class="fa-solid fa-file-invoice-dollar"></i>
+        <div class="report-card d-flex flex-column justify-content-between h-100">
+            <div>
+                <div class="report-card-icon mb-3" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <h5 class="report-card-title mb-2">Payroll Report</h5>
+                <p class="report-card-desc mb-4">Export organizational payroll, gross earnings, and deductions details.</p>
+
+                <form asp-controller="Report" asp-action="ExportPayrollReport" method="get">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold">Department</label>
+                        <select name="departmentId" class="form-select">
+                            <option value="">All Departments</option>
+                            @if (ViewBag.Departments != null)
+                            {
+                                @foreach (var dept in (SelectList)ViewBag.Departments)
+                                {
+                                    <option value="@dept.Value">@dept.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-bold">Month</label>
+                            <select name="month" class="form-select">
+                                @for (int m = 1; m <= 12; m++)
+                                {
+                                    <option value="@m" selected="@(m == currentMonth ? "selected" : null)">
+                                        @System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-bold">Year</label>
+                            <select name="year" class="form-select">
+                                @for (int y = currentYear - 3; y <= currentYear + 1; y++)
+                                {
+                                    <option value="@y" selected="@(y == currentYear ? "selected" : null)">@y</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold">Format</label>
+                        <select name="format" class="form-select">
+                            <option value="pdf">PDF Document</option>
+                            <option value="csv">CSV Spreadsheet</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-warning w-100 text-white">
+                        <i class="fa-solid fa-file-arrow-down me-2"></i>Generate Report
+                    </button>
+                </form>
             </div>
-            <h5 class="report-card-title">Payroll Report</h5>
-            <p class="report-card-desc">Export processed payroll data including earnings, deductions, and net salary summaries.</p>
-            <button class="btn btn-warning w-100">
-                <i class="fa-solid fa-file-arrow-down me-2"></i>Generate Report
-            </button>
         </div>
     </div>
 </div>

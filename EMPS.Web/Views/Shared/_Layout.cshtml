@@ -81,6 +81,12 @@
                                 <span>Payroll processing</span>
                             </a>
                         </li>
+                        <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Report" ? "active" : "")">
+                            <a class="sidebar-link" asp-controller="Report" asp-action="Index">
+                                <i class="fa-solid fa-chart-line"></i>
+                                <span>Reports</span>
+                            </a>
+                        </li>
                     }
                     else
                     {
@@ -91,12 +97,6 @@
                             </a>
                         </li>
                     }
-                    <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Report" ? "active" : "")">
-                        <a class="sidebar-link" asp-controller="Report" asp-action="Index">
-                            <i class="fa-solid fa-chart-line"></i>
-                            <span>Reports</span>
-                        </a>
-                    </li>
                     @if (User.IsInRole("Admin"))
                     {
                         <li class="sidebar-section-label">System</li>
