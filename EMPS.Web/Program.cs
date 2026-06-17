@@ -9,6 +9,7 @@ using EMPS.Infrastructure.Data;
 using EMPS.Infrastructure.Repositories;
 using EMPS.Infrastructure.Services;
 using EMPS.Web.Mapping;
+using EMPS.Web.Services;
 
 // Set QuestPDF community licence once at startup
 QuestPDF.Settings.License = LicenseType.Community;
@@ -51,6 +52,7 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<ILeaveService, LeaveService>();
 builder.Services.AddScoped<IPayrollService, PayrollService>();
+builder.Services.AddScoped<IChatAssistantService, ChatAssistantService>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

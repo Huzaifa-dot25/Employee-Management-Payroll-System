@@ -1,0 +1,178 @@
+@{
+    ViewData["Title"] = "HR Chat Assistant";
+}
+
+<div class="chat-container">
+    <!-- Chat Header -->
+    <div class="chat-header">
+        <div class="chat-header-icon">
+            <i class="fa-solid fa-robot"></i>
+        </div>
+        <div>
+            <h5 class="mb-0 fw-700 text-main">HR AI Assistant</h5>
+            <small class="text-success fw-600"><span class="d-inline-block rounded-circle bg-success me-1" style="width: 8px; height: 8px;"></span> Online & Connected to DB</small>
+        </div>
+    </div>
+
+    <!-- Chat Messages Window -->
+    <div class="chat-messages" id="chat-messages-box">
+        <!-- Default Greeting Message -->
+        <div class="message-bubble assistant">
+            <div class="message-sender">Assistant</div>
+            <div class="message-content">
+                <div class="assistant-response-card">
+                    <div class="assistant-welcome-header mb-3">
+                        <div class="welcome-icon"><i class="fa-solid fa-robot"></i></div>
+                        <div>
+                            <h6 class="mb-0 fw-700 text-main">HR AI Assistant</h6>
+                            <small class="text-muted">Ready to read the database</small>
+                        </div>
+                    </div>
+                    <p class="mb-3 text-sub" style="font-size: 0.9rem;">
+                        Hello! I am your HR Chat Assistant. I can query the Employee Database directly to retrieve real-time payroll, attendance, and department stats.
+                    </p>
+                    <div class="suggestion-prompt-label mb-2">Try asking me:</div>
+                    <div class="suggested-queries-list d-flex flex-column gap-2">
+                        <button class="suggest-btn" onclick="sendQuickMessage('How many employees are absent today?')">
+                            <i class="fa-solid fa-calendar-minus me-2 text-warning"></i>How many employees are absent today?
+                        </button>
+                        <button class="suggest-btn" onclick="sendQuickMessage('Show employees in the IT department.')">
+                            <i class="fa-solid fa-sitemap me-2 text-primary"></i>Show employees in the IT department.
+                        </button>
+                        <button class="suggest-btn" onclick="sendQuickMessage('Who has the highest salary?')">
+                            <i class="fa-solid fa-money-bill-wave me-2 text-success"></i>Who has the highest salary?
+                        </button>
+                        <button class="suggest-btn" onclick="sendQuickMessage('How many leave requests are pending?')">
+                            <i class="fa-solid fa-business-time me-2 text-info"></i>How many leave requests are pending?
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typing Indicator (Hidden by default) -->
+    <div id="typing-indicator-wrapper" class="message-bubble assistant d-none" style="margin-left: 24px; margin-bottom: 15px;">
+        <div class="message-sender">Assistant is querying database</div>
+        <div class="message-content p-2" style="background:#fff; border:1px solid rgba(0,0,0,0.05); width:fit-content;">
+            <div class="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suggestion Chips Bar -->
+    <div class="chat-suggestions-wrapper">
+        <button class="suggestion-chip" onclick="sendQuickMessage('How many employees are absent today?')">Absent Today</button>
+        <button class="suggestion-chip" onclick="sendQuickMessage('Show employees in the IT department.')">IT Department</button>
+        <button class="suggestion-chip" onclick="sendQuickMessage('Who has the highest salary?')">Highest Salary</button>
+        <button class="suggestion-chip" onclick="sendQuickMessage('How many leave requests are pending?')">Pending Leaves</button>
+        <button class="suggestion-chip" onclick="sendQuickMessage('Total employee count')">Total Employees</button>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="chat-input-wrapper">
+        <form id="chat-input-form" class="chat-input-form" onsubmit="event.preventDefault(); handleSendMessage();">
+            <input type="text" id="chat-user-input" class="chat-input-field" placeholder="Ask about employees, salaries, leaves, or attendance..." autocomplete="off" />
+            <button type="submit" class="chat-send-btn">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const chatMessagesBox = document.getElementById('chat-messages-box');
+        const chatUserInput = document.getElementById('chat-user-input');
+        const typingIndicatorWrapper = document.getElementById('typing-indicator-wrapper');
+
+        function scrollToBottom() {
+            chatMessagesBox.scrollTop = chatMessagesBox.scrollHeight;
+        }
+
+        // Auto-scroll on initial load
+        scrollToBottom();
+
+        function appendMessage(sender, htmlContent, isUser = false) {
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${isUser ? 'user' : 'assistant'}`;
+
+            const senderLabel = document.createElement('div');
+            senderLabel.className = 'message-sender';
+            senderLabel.innerText = sender;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = htmlContent;
+
+            bubble.appendChild(senderLabel);
+            bubble.appendChild(contentDiv);
+
+            chatMessagesBox.appendChild(bubble);
+            scrollToBottom();
+        }
+
+        async function handleSendMessage(customMessage = null) {
+            const messageText = customMessage || chatUserInput.value.trim();
+            if (!messageText) return;
+
+            if (!customMessage) {
+                chatUserInput.value = '';
+            }
+
+            // Append User Message
+            appendMessage('You', escapeHtml(messageText), true);
+
+            // Show Typing Indicator
+            typingIndicatorWrapper.classList.remove('d-none');
+            scrollToBottom();
+
+            try {
+                const response = await fetch('/Chat/SendMessage', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: messageText })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    appendMessage('Assistant', data.response, false);
+                } else {
+                    appendMessage('Assistant', `
+                        <div class='assistant-response-error text-danger'>
+                            <i class='fa-solid fa-circle-exmark me-2'></i>Could not get response from server (Status: ${response.status}).
+                        </div>
+                    `, false);
+                }
+            } catch (error) {
+                appendMessage('Assistant', `
+                    <div class='assistant-response-error text-danger'>
+                        <i class='fa-solid fa-circle-exmark me-2'></i>Network error: ${error.message}
+                    </div>
+                `, false);
+            } finally {
+                // Hide Typing Indicator
+                typingIndicatorWrapper.classList.add('d-none');
+                scrollToBottom();
+            }
+        }
+
+        function sendQuickMessage(messageText) {
+            handleSendMessage(messageText);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        // Support clicking links/buttons generated inside assistant replies to run chat queries
+        window.sendQuickMessage = sendQuickMessage;
+    </script>
+}

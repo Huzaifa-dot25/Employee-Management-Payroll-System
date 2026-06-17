@@ -87,6 +87,12 @@
                                 <span>Reports</span>
                             </a>
                         </li>
+                        <li class="sidebar-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Chat" ? "active" : "")">
+                            <a class="sidebar-link" asp-controller="Chat" asp-action="Index">
+                                <i class="fa-solid fa-robot"></i>
+                                <span>HR Chat Assistant</span>
+                            </a>
+                        </li>
                     }
                     else
                     {
