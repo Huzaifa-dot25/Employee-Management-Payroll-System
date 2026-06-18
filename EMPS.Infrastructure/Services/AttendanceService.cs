@@ -89,5 +89,49 @@ namespace EMPS.Infrastructure.Services
 
             return results.OrderByDescending(a => a.Date);
         }
+
+        public async Task<Attendance?> GetTodayAttendanceForEmployeeAsync(int employeeId)
+        {
+            var today = DateTime.Today;
+            var records = await _unitOfWork.Attendances.FindAsync(a => a.EmployeeId == employeeId && a.Date.Date == today);
+            return records.FirstOrDefault();
+        }
+
+        public async Task CheckInEmployeeAsync(int employeeId, TimeSpan checkInTime, string userId)
+        {
+            var today = DateTime.Today;
+            var existing = await GetTodayAttendanceForEmployeeAsync(employeeId);
+            if (existing != null)
+                return; // Already checked in
+
+            var status = checkInTime > new TimeSpan(9, 0, 0) ? "Late" : "Present";
+
+            var attendance = new Attendance
+            {
+                EmployeeId = employeeId,
+                Date = today,
+                CheckInTime = checkInTime,
+                Status = status,
+                Remarks = "Checked in via Dashboard"
+            };
+
+            await _unitOfWork.Attendances.AddAsync(attendance);
+            await _unitOfWork.SaveChangesAsync(userId);
+        }
+
+        public async Task CheckOutEmployeeAsync(int employeeId, TimeSpan checkOutTime, string userId)
+        {
+            var existing = await GetTodayAttendanceForEmployeeAsync(employeeId);
+            if (existing == null || existing.CheckOutTime.HasValue)
+                return; // No check-in today or already checked out
+
+            existing.CheckOutTime = checkOutTime;
+            existing.Remarks = string.IsNullOrEmpty(existing.Remarks) 
+                ? "Checked out via Dashboard" 
+                : existing.Remarks + " | Checked out via Dashboard";
+
+            _unitOfWork.Attendances.Update(existing);
+            await _unitOfWork.SaveChangesAsync(userId);
+        }
     }
 }

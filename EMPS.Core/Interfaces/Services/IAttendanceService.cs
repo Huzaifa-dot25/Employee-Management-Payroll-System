@@ -22,5 +22,14 @@ namespace EMPS.Core.Interfaces.Services
 
         /// <summary>Returns full attendance history for one employee with optional date-range filter.</summary>
         Task<IEnumerable<Attendance>> GetEmployeeHistoryAsync(int employeeId, DateTime? from = null, DateTime? to = null);
+
+        /// <summary>Gets today's attendance record for the employee.</summary>
+        Task<Attendance?> GetTodayAttendanceForEmployeeAsync(int employeeId);
+
+        /// <summary>Marks employee check-in today.</summary>
+        Task CheckInEmployeeAsync(int employeeId, TimeSpan checkInTime, string userId);
+
+        /// <summary>Marks employee check-out today.</summary>
+        Task CheckOutEmployeeAsync(int employeeId, TimeSpan checkOutTime, string userId);
     }
 }

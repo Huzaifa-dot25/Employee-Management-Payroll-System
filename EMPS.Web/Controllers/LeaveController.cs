@@ -19,19 +19,22 @@ namespace EMPS.Web.Controllers
     {
         private readonly ILeaveService _leaveService;
         private readonly IEmployeeService _employeeService;
+        private readonly IAttendanceService _attendanceService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
 
         public LeaveController(
             ILeaveService leaveService,
             IEmployeeService employeeService,
+            IAttendanceService attendanceService,
             UserManager<ApplicationUser> userManager,
             IMapper mapper)
         {
-            _leaveService    = leaveService;
-            _employeeService = employeeService;
-            _userManager     = userManager;
-            _mapper          = mapper;
+            _leaveService       = leaveService;
+            _employeeService    = employeeService;
+            _attendanceService = attendanceService;
+            _userManager        = userManager;
+            _mapper             = mapper;
         }
 
         public async Task<IActionResult> Index()
@@ -114,6 +117,8 @@ namespace EMPS.Web.Controllers
                 var leaveRequest = await _leaveService.GetLeaveRequestByIdAsync(id);
                 if (leaveRequest == null) return NotFound();
 
+                var statusChangedToApproved = model.Status == "Approved" && leaveRequest.Status != "Approved";
+
                 _mapper.Map(model, leaveRequest);
 
                 if (model.Status == "Approved" || model.Status == "Rejected")
@@ -124,6 +129,35 @@ namespace EMPS.Web.Controllers
 
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "System";
                 await _leaveService.UpdateLeaveRequestAsync(leaveRequest, userId);
+
+                if (statusChangedToApproved)
+                {
+                    for (var d = leaveRequest.StartDate.Date; d <= leaveRequest.EndDate.Date; d = d.AddDays(1))
+                    {
+                        var existingList = await _attendanceService.GetEmployeeHistoryAsync(leaveRequest.EmployeeId, d, d);
+                        var existing = existingList.FirstOrDefault();
+                        if (existing != null)
+                        {
+                            existing.Status = "Leave";
+                            existing.CheckInTime = null;
+                            existing.CheckOutTime = null;
+                            existing.Remarks = $"Approved Leave: {leaveRequest.LeaveType}";
+                            await _attendanceService.UpdateAttendanceAsync(existing, userId);
+                        }
+                        else
+                        {
+                            var att = new Attendance
+                            {
+                                EmployeeId = leaveRequest.EmployeeId,
+                                Date = d,
+                                Status = "Leave",
+                                Remarks = $"Approved Leave: {leaveRequest.LeaveType}"
+                            };
+                            await _attendanceService.CreateAttendanceAsync(att, userId);
+                        }
+                    }
+                }
+
                 TempData["SuccessMessage"] = "Leave request updated successfully.";
                 return RedirectToAction(nameof(Index));
             }

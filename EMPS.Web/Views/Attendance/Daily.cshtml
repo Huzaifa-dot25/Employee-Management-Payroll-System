@@ -133,6 +133,10 @@ else
                                 { <span class="status-badge status-terminated">Absent</span> }
                                 else if (item.Status == "Leave")
                                 { <span class="status-badge status-pending">Leave</span> }
+                                else if (item.Status == "Late")
+                                { <span class="status-badge" style="background:#fff7ed;color:#ea580c;border:1px solid #ffedd5;padding:.25rem .6rem;border-radius:50rem;font-size:.75rem;font-weight:600;">Late</span> }
+                                else if (item.Status == "HalfDay")
+                                { <span class="status-badge" style="background:#faf5ff;color:#9333ea;border:1px solid #f3e8ff;padding:.25rem .6rem;border-radius:50rem;font-size:.75rem;font-weight:600;">Half Day</span> }
                                 else
                                 { <span class="status-badge status-inactive">@item.Status</span> }
                             </td>
@@ -148,7 +152,15 @@ else
                             </td>
                             <td>
                                 @if (hours.HasValue)
-                                { <span class="text-sub">@hours.Value.ToString("F1")h</span> }
+                                {
+                                    var baseHrs = Math.Min(8, hours.Value);
+                                    var otHrs = Math.Max(0, hours.Value - 8);
+                                    <span class="fw-semibold">@baseHrs.ToString("F1")h</span>
+                                    if (otHrs > 0)
+                                    {
+                                        <span class="badge bg-success-subtle text-success ms-1" style="font-size: 0.7rem; padding: 0.2rem 0.4rem;">+@otHrs.ToString("F1")h OT</span>
+                                    }
+                                }
                                 else { <span class="text-muted">—</span> }
                             </td>
                             <td><span class="text-muted" style="font-size:.8rem;">@(string.IsNullOrEmpty(item.Remarks) ? "—" : item.Remarks)</span></td>

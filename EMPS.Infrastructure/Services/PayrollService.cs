@@ -102,6 +102,24 @@ namespace EMPS.Infrastructure.Services
             var hourlyRate    = emp.BasicSalary / WorkingHoursPerMonth;
             var overtimeRate  = Math.Round(hourlyRate * OvertimeMultiplier, 2);
 
+            var attendances = await _unitOfWork.Attendances.FindAsync(a => 
+                a.EmployeeId == employeeId && 
+                a.Date.Month == month && 
+                a.Date.Year == year);
+
+            decimal totalOvertimeHours = 0m;
+            foreach (var att in attendances)
+            {
+                if (att.CheckInTime.HasValue && att.CheckOutTime.HasValue)
+                {
+                    var duration = (att.CheckOutTime.Value - att.CheckInTime.Value).TotalHours;
+                    if (duration > 8)
+                    {
+                        totalOvertimeHours += (decimal)(duration - 8);
+                    }
+                }
+            }
+
             return new Payroll
             {
                 EmployeeId         = employeeId,
@@ -111,7 +129,7 @@ namespace EMPS.Infrastructure.Services
                 BasicSalary        = emp.BasicSalary,
                 Allowances         = 0,
                 Bonuses            = 0,
-                OvertimeHours      = 0,
+                OvertimeHours      = Math.Round(totalOvertimeHours, 1),
                 OvertimeRatePerHour = overtimeRate,
                 TaxRate            = DefaultTaxRate,
                 OtherDeductions    = 0,

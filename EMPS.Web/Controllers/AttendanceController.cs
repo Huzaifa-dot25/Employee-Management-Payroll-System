@@ -228,6 +228,42 @@ namespace EMPS.Web.Controllers
             return View(model);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckIn()
+        {
+            var employeeId = await GetCurrentEmployeeIdAsync();
+            if (!employeeId.HasValue)
+            {
+                TempData["ErrorMessage"] = "No employee record linked to your user account.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "System";
+            var now = DateTime.Now.TimeOfDay;
+            await _attendanceService.CheckInEmployeeAsync(employeeId.Value, now, userId);
+            TempData["SuccessMessage"] = "Checked in successfully at " + DateTime.Now.ToString("hh:mm tt") + ".";
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckOut()
+        {
+            var employeeId = await GetCurrentEmployeeIdAsync();
+            if (!employeeId.HasValue)
+            {
+                TempData["ErrorMessage"] = "No employee record linked to your user account.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "System";
+            var now = DateTime.Now.TimeOfDay;
+            await _attendanceService.CheckOutEmployeeAsync(employeeId.Value, now, userId);
+            TempData["SuccessMessage"] = "Checked out successfully at " + DateTime.Now.ToString("hh:mm tt") + ".";
+            return RedirectToAction("Index", "Home");
+        }
+
         // ── Helpers ──────────────────────────────────────────────────────────
 
         private async Task<int?> GetCurrentEmployeeIdAsync()
