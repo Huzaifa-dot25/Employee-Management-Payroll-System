@@ -2200,3 +2200,251 @@ div.dataTables_wrapper div.dataTables_paginate .paginate_button.disabled:hover {
   padding: 4px;
 }
 
+
+
+/* ============================================================
+   MOBILE SIDEBAR  (responsive overlay behaviour)
+   ============================================================ */
+
+/* Overlay backdrop */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 199;
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.sidebar-overlay.visible {
+  display: block;
+  opacity: 1;
+}
+
+/* Hamburger */
+.hamburger-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  color: var(--text-sub);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+  flex-shrink: 0;
+}
+
+.hamburger-btn:hover {
+  background: #e8ecf4;
+  border-color: #c5ccd8;
+  color: var(--text-main);
+}
+
+/* Sidebar close button (mobile) */
+.sidebar-close-btn {
+  display: none;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background var(--transition);
+  z-index: 10;
+}
+
+.sidebar-close-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+/* Mobile breakpoint */
+@media (max-width: 991.98px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 200;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+  }
+
+  /* Shift brand title to make room for close button */
+  .sidebar-brand {
+    padding-right: 52px;
+  }
+}
+
+/* ============================================================
+   NAV TABS  (used on Attendance sub-tabs)
+   ============================================================ */
+.nav-tabs .nav-link {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 14px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.nav-tabs .nav-link:hover {
+  color: var(--primary);
+  border-bottom-color: #c7d2fe;
+  background: transparent;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--primary);
+  border-bottom: 2px solid var(--primary);
+  background: transparent;
+  font-weight: 700;
+}
+
+.nav-tabs {
+  border-bottom: 1px solid var(--border) !important;
+  gap: 2px;
+}
+
+/* ============================================================
+   IMPROVED DROPDOWN MENU
+   ============================================================ */
+.dropdown-menu {
+  min-width: 200px;
+}
+
+.dropdown-menu li:first-child .px-3 {
+  border-bottom: 1px solid var(--border);
+}
+
+/* ============================================================
+   RESPONSIVE CONTENT  (less padding on small screens)
+   ============================================================ */
+@media (max-width: 767.98px) {
+  .content-wrapper {
+    padding: 16px;
+  }
+
+  .top-navbar {
+    padding: 0 16px;
+  }
+
+  .module-header {
+    gap: 12px;
+  }
+
+  .module-title {
+    font-size: 1.1rem;
+  }
+
+  .module-stats-strip {
+    padding: 12px 16px;
+  }
+
+  .mss-item {
+    padding: 0 12px;
+    min-width: 70px;
+  }
+
+  .mss-value {
+    font-size: 1.2rem;
+  }
+
+  .data-table-card {
+    border-radius: 8px;
+  }
+}
+
+/* ============================================================
+   IMPROVED TABLE HEADER
+   ============================================================ */
+.module-table thead th {
+  background: linear-gradient(180deg, #f7f8ff 0%, #f0f2f9 100%);
+}
+
+/* ============================================================
+   FORM CARD POLISH
+   ============================================================ */
+.form-card {
+  transition: box-shadow var(--transition);
+}
+
+.form-card:hover {
+  box-shadow: var(--shadow);
+}
+
+/* ============================================================
+   BETTER FOCUS RINGS
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   SIDEBAR SECTION LABELS — slightly more visible
+   ============================================================ */
+.sidebar-section-label {
+  font-size: 0.62rem;
+  letter-spacing: 1.4px;
+  color: rgba(255, 255, 255, 0.28);
+  padding: 20px 22px 5px;
+}
+
+.sidebar-menu > li:first-child.sidebar-section-label {
+  padding-top: 10px;
+}
+
+/* ============================================================
+   STAT CARD ACCENT COLOURS
+   ============================================================ */
+.card-stat.stat-success::before { background: linear-gradient(180deg, var(--success), #34d399); }
+.card-stat.stat-warning::before { background: linear-gradient(180deg, var(--warning), #fbbf24); }
+.card-stat.stat-danger::before  { background: linear-gradient(180deg, var(--danger),  #f87171); }
+.card-stat.stat-info::before    { background: linear-gradient(180deg, var(--info),    #38bdf8); }
+
+/* ============================================================
+   SMOOTH PAGE LOAD
+   ============================================================ */
+.content-wrapper {
+  animation: fadeContent 0.2s ease-out;
+}
+
+@keyframes fadeContent {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
