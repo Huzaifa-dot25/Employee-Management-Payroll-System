@@ -16,7 +16,7 @@ using EMPS.Web.Models;
 
 namespace EMPS.Web.Controllers
 {
-    [Authorize(Roles = "Admin,HR")]
+    [Authorize]
     public class EmployeeController : Controller
     {
         private readonly IEmployeeService _employeeService;
@@ -42,6 +42,7 @@ namespace EMPS.Web.Controllers
             _hostEnvironment = hostEnvironment;
         }
 
+        [Authorize(Roles = "Admin,HR")]
         public async Task<IActionResult> Index()
         {
             var employees = await _employeeService.GetAllEmployeesAsync();
@@ -52,6 +53,15 @@ namespace EMPS.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
+            if (User.IsInRole("Employee"))
+            {
+                var employeeId = await GetCurrentEmployeeIdAsync();
+                if (employeeId != id)
+                {
+                    return Forbid();
+                }
+            }
+
             var employee = await _employeeService.GetEmployeeByIdAsync(id);
             if (employee == null)
             {
@@ -61,6 +71,7 @@ namespace EMPS.Web.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Admin,HR")]
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -72,6 +83,7 @@ namespace EMPS.Web.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Admin,HR")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(EmployeeViewModel model)
@@ -132,6 +144,15 @@ namespace EMPS.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
+            if (User.IsInRole("Employee"))
+            {
+                var employeeId = await GetCurrentEmployeeIdAsync();
+                if (employeeId != id)
+                {
+                    return Forbid();
+                }
+            }
+
             var employee = await _employeeService.GetEmployeeByIdAsync(id);
             if (employee == null)
             {
@@ -150,6 +171,15 @@ namespace EMPS.Web.Controllers
             if (id != model.Id)
             {
                 return NotFound();
+            }
+
+            if (User.IsInRole("Employee"))
+            {
+                var employeeId = await GetCurrentEmployeeIdAsync();
+                if (employeeId != id)
+                {
+                    return Forbid();
+                }
             }
 
             if (ModelState.IsValid)
@@ -172,8 +202,31 @@ namespace EMPS.Web.Controllers
                     photoPath = await UploadProfileImageAsync(model.ProfileImage);
                 }
 
-                // Update Employee details
-                _mapper.Map(model, employee);
+                // Update Employee details with role-based restrictions
+                if (!User.IsInRole("Admin") && !User.IsInRole("HR"))
+                {
+                    // Restore non-editable details to prevent tampering
+                    var originalCode = employee.EmployeeCode;
+                    var originalDeptId = employee.DepartmentId;
+                    var originalDesigId = employee.DesignationId;
+                    var originalJoining = employee.JoiningDate;
+                    var originalSalary = employee.BasicSalary;
+                    var originalStatus = employee.EmploymentStatus;
+
+                    _mapper.Map(model, employee);
+
+                    employee.EmployeeCode = originalCode;
+                    employee.DepartmentId = originalDeptId;
+                    employee.DesignationId = originalDesigId;
+                    employee.JoiningDate = originalJoining;
+                    employee.BasicSalary = originalSalary;
+                    employee.EmploymentStatus = originalStatus;
+                }
+                else
+                {
+                    _mapper.Map(model, employee);
+                }
+
                 employee.ProfilePhotoPath = photoPath;
 
                 var updaterId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "System";
@@ -193,6 +246,11 @@ namespace EMPS.Web.Controllers
                 }
 
                 TempData["SuccessMessage"] = "Employee details updated successfully!";
+                
+                if (User.IsInRole("Employee"))
+                {
+                    return RedirectToAction(nameof(Details), new { id = id });
+                }
                 return RedirectToAction(nameof(Index));
             }
 
@@ -200,6 +258,7 @@ namespace EMPS.Web.Controllers
             return View(model);
         }
 
+        [Authorize(Roles = "Admin,HR")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -270,6 +329,14 @@ namespace EMPS.Web.Controllers
             {
                 System.IO.File.Delete(fullPath);
             }
+        }
+
+        private async Task<int?> GetCurrentEmployeeIdAsync()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return null;
+            var appUser = await _userManager.FindByIdAsync(userId);
+            return appUser?.EmployeeId;
         }
     }
 }

@@ -128,46 +128,85 @@
                                 <input asp-for="EmployeeCode" class="form-control form-control-custom" readonly style="background-color: #f1f5f9; font-family: monospace;" />
                             </div>
 
-                            <div>
-                                <label asp-for="DepartmentId" class="form-label form-label-custom">Department</label>
-                                <select asp-for="DepartmentId" class="form-select form-control-custom" id="deptSelect" asp-items="ViewBag.Departments">
-                                </select>
-                                <span asp-validation-for="DepartmentId" class="text-danger" style="font-size: 0.8rem;"></span>
-                            </div>
-
-                            <div>
-                                <label asp-for="DesignationId" class="form-label form-label-custom">Designation</label>
-                                <select asp-for="DesignationId" class="form-select form-control-custom" id="desigSelect" asp-items="ViewBag.Designations">
-                                    <option value="">-- Select Designation --</option>
-                                </select>
-                                <span asp-validation-for="DesignationId" class="text-danger" style="font-size: 0.8rem;"></span>
-                            </div>
-
-                            <div>
-                                <label asp-for="JoiningDate" class="form-label form-label-custom">Joining Date</label>
-                                <input asp-for="JoiningDate" class="form-control form-control-custom" type="date" />
-                                <span asp-validation-for="JoiningDate" class="text-danger" style="font-size: 0.8rem;"></span>
-                            </div>
-
-                            <div>
-                                <label asp-for="BasicSalary" class="form-label form-label-custom">Basic Salary</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white text-muted" style="border-radius: 8px 0 0 8px; border-color: var(--border-color); font-weight: 500;">$</span>
-                                    <input asp-for="BasicSalary" class="form-control form-control-custom" style="border-radius: 0 8px 8px 0;" type="number" step="0.01" />
+                            @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+                            {
+                                <div>
+                                    <label asp-for="DepartmentId" class="form-label form-label-custom">Department</label>
+                                    <select asp-for="DepartmentId" class="form-select form-control-custom" id="deptSelect" asp-items="ViewBag.Departments">
+                                    </select>
+                                    <span asp-validation-for="DepartmentId" class="text-danger" style="font-size: 0.8rem;"></span>
                                 </div>
-                                <span asp-validation-for="BasicSalary" class="text-danger" style="font-size: 0.8rem;"></span>
-                            </div>
 
-                            <div>
-                                <label asp-for="EmploymentStatus" class="form-label form-label-custom">Employment Status</label>
-                                <select asp-for="EmploymentStatus" class="form-select form-control-custom">
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                    <option value="Terminated">Terminated</option>
-                                    <option value="Resigned">Resigned</option>
-                                </select>
-                                <span asp-validation-for="EmploymentStatus" class="text-danger" style="font-size: 0.8rem;"></span>
-                            </div>
+                                <div>
+                                    <label asp-for="DesignationId" class="form-label form-label-custom">Designation</label>
+                                    <select asp-for="DesignationId" class="form-select form-control-custom" id="desigSelect" asp-items="ViewBag.Designations">
+                                        <option value="">-- Select Designation --</option>
+                                    </select>
+                                    <span asp-validation-for="DesignationId" class="text-danger" style="font-size: 0.8rem;"></span>
+                                </div>
+
+                                <div>
+                                    <label asp-for="JoiningDate" class="form-label form-label-custom">Joining Date</label>
+                                    <input asp-for="JoiningDate" class="form-control form-control-custom" type="date" />
+                                    <span asp-validation-for="JoiningDate" class="text-danger" style="font-size: 0.8rem;"></span>
+                                </div>
+
+                                <div>
+                                    <label asp-for="BasicSalary" class="form-label form-label-custom">Basic Salary</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white text-muted" style="border-radius: 8px 0 0 8px; border-color: var(--border-color); font-weight: 500;">$</span>
+                                        <input asp-for="BasicSalary" class="form-control form-control-custom" style="border-radius: 0 8px 8px 0;" type="number" step="0.01" />
+                                    </div>
+                                    <span asp-validation-for="BasicSalary" class="text-danger" style="font-size: 0.8rem;"></span>
+                                </div>
+
+                                <div>
+                                    <label asp-for="EmploymentStatus" class="form-label form-label-custom">Employment Status</label>
+                                    <select asp-for="EmploymentStatus" class="form-select form-control-custom">
+                                        <option value="Active">Active</option>
+                                        <option value="Inactive">Inactive</option>
+                                        <option value="Terminated">Terminated</option>
+                                        <option value="Resigned">Resigned</option>
+                                    </select>
+                                    <span asp-validation-for="EmploymentStatus" class="text-danger" style="font-size: 0.8rem;"></span>
+                                </div>
+                            }
+                            else
+                            {
+                                <input type="hidden" asp-for="DepartmentId" />
+                                <input type="hidden" asp-for="DesignationId" />
+                                <input type="hidden" asp-for="JoiningDate" />
+                                <input type="hidden" asp-for="BasicSalary" />
+                                <input type="hidden" asp-for="EmploymentStatus" />
+
+                                <div>
+                                    <label class="form-label form-label-custom">Department</label>
+                                    <input class="form-control form-control-custom" value="@Model.DepartmentName" readonly style="background-color: #f1f5f9;" />
+                                </div>
+
+                                <div>
+                                    <label class="form-label form-label-custom">Designation</label>
+                                    <input class="form-control form-control-custom" value="@Model.DesignationName" readonly style="background-color: #f1f5f9;" />
+                                </div>
+
+                                <div>
+                                    <label class="form-label form-label-custom">Joining Date</label>
+                                    <input class="form-control form-control-custom" value="@Model.JoiningDate.ToString("yyyy-MM-dd")" readonly style="background-color: #f1f5f9;" type="date" />
+                                </div>
+
+                                <div>
+                                    <label class="form-label form-label-custom">Basic Salary</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-muted" style="border-radius: 8px 0 0 8px; border-color: var(--border-color); font-weight: 500;">$</span>
+                                        <input class="form-control form-control-custom" value="@Model.BasicSalary" readonly style="background-color: #f1f5f9; border-radius: 0 8px 8px 0;" type="number" step="0.01" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="form-label form-label-custom">Employment Status</label>
+                                    <input class="form-control form-control-custom" value="@Model.EmploymentStatus" readonly style="background-color: #f1f5f9;" />
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -178,7 +217,14 @@
     <!-- Action Buttons -->
     <div class="card-flat">
         <div class="card-flat-body d-flex justify-content-end gap-3 py-3">
-            <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+            @if (User.IsInRole("Admin") || User.IsInRole("HR"))
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancel</a>
+            }
+            else
+            {
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary px-4">Cancel</a>
+            }
             <button type="submit" class="btn btn-primary px-4"><i class="fa-solid fa-floppy-disk me-2"></i>Update Employee</button>
         </div>
     </div>

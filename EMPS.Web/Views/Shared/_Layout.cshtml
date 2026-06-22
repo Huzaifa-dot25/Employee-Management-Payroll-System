@@ -199,13 +199,23 @@
                                     <div style="font-size:.72rem;color:#6b7280;">@(currentUser?.Email ?? "")</div>
                                 </div>
                             </li>
-                            <li>
-                                <a asp-controller="Account" asp-action="ChangePassword"
-                                   class="dropdown-item d-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-lock" style="color:#4f46e5;width:14px;"></i>
-                                    <span>Change Password</span>
-                                </a>
-                            </li>
+                             @if (currentUser?.EmployeeId != null)
+                             {
+                                 <li>
+                                     <a asp-controller="Employee" asp-action="Details" asp-route-id="@currentUser.EmployeeId"
+                                        class="dropdown-item d-flex align-items-center gap-2">
+                                         <i class="fa-solid fa-user" style="color:#4f46e5;width:14px;"></i>
+                                         <span>My Profile</span>
+                                     </a>
+                                 </li>
+                             }
+                             <li>
+                                 <a asp-controller="Account" asp-action="ChangePassword"
+                                    class="dropdown-item d-flex align-items-center gap-2">
+                                     <i class="fa-solid fa-lock" style="color:#4f46e5;width:14px;"></i>
+                                     <span>Change Password</span>
+                                 </a>
+                             </li>
                             <li><hr class="dropdown-divider my-1"></li>
                             <li>
                                 <form asp-controller="Account" asp-action="Logout" method="post">
