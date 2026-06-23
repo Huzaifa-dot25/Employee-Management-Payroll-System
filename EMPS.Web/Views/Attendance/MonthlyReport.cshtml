@@ -79,10 +79,20 @@
                 }
             </select>
         </div>
-        <div class="col-auto">
+        <div class="col-auto d-flex gap-2">
             <button type="submit" class="btn btn-primary px-4">
                 <i class="fa-solid fa-magnifying-glass me-2"></i>Generate
             </button>
+            @if (Model.Rows.Any())
+            {
+                <a asp-action="DownloadMonthlyReport" 
+                   asp-route-month="@Model.Month" 
+                   asp-route-year="@Model.Year" 
+                   asp-route-departmentId="@Model.DepartmentId" 
+                   class="btn btn-success px-4">
+                    <i class="fa-solid fa-file-excel me-2"></i>Download Excel
+                </a>
+            }
         </div>
     </form>
 </div>

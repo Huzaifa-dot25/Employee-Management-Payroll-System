@@ -11,6 +11,8 @@ using EMPS.Core.Entities;
 using EMPS.Core.Interfaces.Services;
 using EMPS.Web.Models;
 using System.Linq;
+using System.IO;
+using ClosedXML.Excel;
 
 namespace EMPS.Web.Controllers
 {
@@ -186,6 +188,88 @@ namespace EMPS.Web.Controllers
 
             await PopulateDepartmentsDropdownAsync(departmentId);
             return View(model);
+        }
+
+        [Authorize(Roles = "Admin,HR")]
+        [HttpGet]
+        public async Task<IActionResult> DownloadMonthlyReport(int? month, int? year, int? departmentId)
+        {
+            var m = month ?? DateTime.Today.Month;
+            var y = year  ?? DateTime.Today.Year;
+
+            var records = await _attendanceService.GetMonthlyReportAsync(m, y, departmentId);
+
+            var rows = records
+                .GroupBy(a => a.EmployeeId)
+                .Select(g =>
+                {
+                    var emp = g.First().Employee;
+                    return new EmployeeMonthlyRow
+                    {
+                        EmployeeId    = g.Key,
+                        EmployeeName  = emp?.FullName          ?? "—",
+                        EmployeeCode  = emp?.EmployeeCode      ?? "—",
+                        Department    = emp?.Department?.Name  ?? "—",
+                        PresentDays   = g.Count(a => a.Status == "Present"),
+                        AbsentDays    = g.Count(a => a.Status == "Absent"),
+                        LeaveDays     = g.Count(a => a.Status == "Leave"),
+                        LateDays      = g.Count(a => a.Status == "Late"),
+                        HalfDays      = g.Count(a => a.Status == "HalfDay"),
+                        TotalRecorded = g.Count()
+                    };
+                })
+                .OrderBy(r => r.EmployeeName)
+                .ToList();
+
+            string monthName = new DateTime(y, m, 1).ToString("MMMM");
+            string deptName = "All Departments";
+            if (departmentId.HasValue)
+            {
+                var dept = await _departmentService.GetDepartmentByIdAsync(departmentId.Value);
+                deptName = dept?.Name ?? "All Departments";
+            }
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Monthly Attendance");
+
+            // Header row
+            worksheet.Cell(1, 1).Value = "Employee Name";
+            worksheet.Cell(1, 2).Value = "Employee Code";
+            worksheet.Cell(1, 3).Value = "Department";
+            worksheet.Cell(1, 4).Value = "Present";
+            worksheet.Cell(1, 5).Value = "Absent";
+            worksheet.Cell(1, 6).Value = "Leave";
+            worksheet.Cell(1, 7).Value = "Late";
+            worksheet.Cell(1, 8).Value = "Half Day";
+            worksheet.Cell(1, 9).Value = "Attendance Rate (%)";
+
+            // Format header
+            var headerRange = worksheet.Range("A1:I1");
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+            int currentRow = 2;
+            foreach (var row in rows)
+            {
+                worksheet.Cell(currentRow, 1).Value = row.EmployeeName;
+                worksheet.Cell(currentRow, 2).Value = row.EmployeeCode;
+                worksheet.Cell(currentRow, 3).Value = row.Department;
+                worksheet.Cell(currentRow, 4).Value = row.PresentDays;
+                worksheet.Cell(currentRow, 5).Value = row.AbsentDays;
+                worksheet.Cell(currentRow, 6).Value = row.LeaveDays;
+                worksheet.Cell(currentRow, 7).Value = row.LateDays;
+                worksheet.Cell(currentRow, 8).Value = row.HalfDays;
+                worksheet.Cell(currentRow, 9).Value = row.AttendanceRate;
+                currentRow++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+            var fileName = $"Monthly_Attendance_{monthName}_{y}_{deptName.Replace(" ", "_")}.xlsx";
+            return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
         // ── Employee Attendance History ───────────────────────────────────────
